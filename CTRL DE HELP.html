@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 HelpVision 🔍 V1.0</title>
+
+    <!-- Papa Parse -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js">
+    </script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    <!-- Chart.js DataLabels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js">
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.2s ease;
+            --filter-bg: #f1f5f9;
+            --table-header-bg: #f1f5f9;
+            --table-row-even: #fafbfc;
+            --table-row-hover: #eef2ff;
+            --chart-bg: #fff;
+            --empty-color: #64748b;
+            --dropzone-bg: #fafbfc;
+            --pagination-btn-bg: #fff;
+            --search-bg: #fafbfc;
+            --btn-icon-bg: #fff;
+        }
+
+        body.dark {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --danger: #ef4444;
+            --danger-bg: #450a0a;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+            --filter-bg: #1e293b;
+            --table-header-bg: #1e293b;
+            --table-row-even: #1e293b;
+            --table-row-hover: #334155;
+            --chart-bg: #1e293b;
+            --empty-color: #94a3b8;
+            --dropzone-bg: #1e293b;
+            --pagination-btn-bg: #1e293b;
+            --search-bg: #1e293b;
+            --btn-icon-bg: #1e293b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background var(--transition), color var(--transition);
+        }
+        .app-header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: background var(--transition);
+        }
+        .app-header .title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .app-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text);
+            white-space: nowrap;
+        }
+        .app-header .credit {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        .badge {
+            font-size: 0.75rem;
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text);
+            background: var(--btn-icon-bg);
+        }
+        .theme-toggle:hover {
+            background: var(--table-row-hover);
+            border-color: var(--primary);
+        }
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 20px 24px;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: background var(--transition);
+        }
+        .card-header {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+            justify-content: space-between;
+        }
+        .card-header .header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-icon {
+            background: none;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text);
+            background: var(--btn-icon-bg);
+        }
+        .btn-icon:hover {
+            background: var(--table-row-hover);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Dropzone */
+        .dropzone {
+            border: 3px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 40px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: var(--dropzone-bg);
+        }
+        .dropzone:hover,
+        .dropzone.drag-over {
+            border-color: var(--primary);
+            background: var(--table-row-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        .dropzone .icon-upload {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .dropzone p {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .dropzone span {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .dropzone input[type="file"] {
+            display: none;
+        }
+        .btn-select {
+            display: inline-block;
+            margin-top: 12px;
+            background: var(--primary);
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all var(--transition);
+            border: none;
+        }
+        .btn-select:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* File info */
+        .file-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            padding: 12px 18px;
+            background: var(--filter-bg);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            margin-top: 16px;
+        }
+        .file-info .fi-item {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .file-info .fi-value {
+            font-weight: 700;
+            color: var(--text);
+            background: var(--card-bg);
+            padding: 3px 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .file-info .fi-name {
+            font-weight: 600;
+            color: var(--primary);
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Filtros */
+        .filter-bar {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 12px 20px;
+            background: var(--filter-bg);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .filter-group label {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text);
+            white-space: nowrap;
+        }
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 14px;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: var(--card-bg);
+            color: var(--text);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all var(--transition);
+            min-width: 150px;
+        }
+        .filter-group input[type="date"] {
+            cursor: text;
+        }
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Barra de pesquisa inteligente */
+        .search-intelligent {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .search-intelligent input {
+            padding: 8px 14px;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: var(--card-bg);
+            color: var(--text);
+            font-weight: 500;
+            transition: all var(--transition);
+            width: 280px;
+        }
+        .search-intelligent input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 200;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        .suggestions-dropdown .suggestion-item {
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+        .suggestions-dropdown .suggestion-item:hover {
+            background: var(--table-row-hover);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+        .tab-btn {
+            padding: 10px 18px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all var(--transition);
+            border-radius: 8px 8px 0 0;
+            white-space: nowrap;
+        }
+        .tab-btn:hover {
+            color: var(--text);
+            background: var(--filter-bg);
+        }
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: var(--table-row-hover);
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Tabelas */
+        .table-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 9px 14px;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            transition: all var(--transition);
+            background: var(--search-bg);
+            color: var(--text);
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            background: var(--card-bg);
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 60vh;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        thead th {
+            background: var(--table-header-bg);
+            color: var(--text);
+            font-weight: 700;
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+            transition: background var(--transition);
+        }
+        thead th:hover {
+            background: var(--border);
+        }
+        thead th .sort-icon {
+            margin-left: 4px;
+            font-size: 0.7rem;
+            opacity: 0.5;
+        }
+        thead th.sorted .sort-icon {
+            opacity: 1;
+            color: var(--primary);
+        }
+        tbody td {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text);
+        }
+        tbody tr:nth-child(even) {
+            background: var(--table-row-even);
+        }
+        tbody tr:hover {
+            background: var(--table-row-hover);
+        }
+        .pagination {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 14px;
+            font-size: 0.85rem;
+        }
+        .pagination button {
+            padding: 7px 12px;
+            border: 1px solid var(--border);
+            background: var(--pagination-btn-bg);
+            color: var(--text);
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition);
+            font-size: 0.8rem;
+        }
+        .pagination button:hover:not(:disabled) {
+            background: var(--table-row-hover);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .pagination button.active-page {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* Gráficos */
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 900px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Indicadores */
+        .highlight-red {
+            background-color: #fee2e2 !important;
+            font-weight: 700;
+        }
+        body.dark .highlight-red {
+            background-color: #450a0a !important;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .kpi-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        .kpi-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+        .kpi-value.danger {
+            color: var(--danger);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.35s ease;
+            max-width: 400px;
+        }
+        .toast.error {
+            background: var(--danger);
+        }
+        .toast.success {
+            background: var(--success);
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        .empty-state .empty-icon {
+            font-size: 3.5rem;
+            display: block;
+            margin-bottom: 10px;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="title-row">
+            <span style="font-size:1.5rem;">📦</span>
+            <h1>HelpVision 🔍 <span style="font-size:0.85rem; font-weight:500; color:var(--text-secondary);">V1.0</span></h1>
+            <span class="badge">Logística & Expedição</span>
+            <button class="theme-toggle" id="themeToggle" title="Alternar modo escuro/claro">🌙</button>
+        </div>
+        <span class="credit">Desenvolvido por Pablo Martins Lopes</span>
+    </header>
+
+    <div class="container">
+        <!-- Upload -->
+        <div class="card" id="uploadCard">
+            <div class="dropzone" id="dropzone">
+                <span class="icon-upload">📁</span>
+                <p>Arraste e solte seu arquivo CSV aqui</p>
+                <span>ou clique para selecionar</span>
+                <br>
+                <label class="btn-select" for="fileInput">📂 Selecionar Arquivo</label>
+                <input type="file" id="fileInput" accept=".csv,.tsv,.txt">
+            </div>
+            <div class="file-info" id="fileInfo" style="display:none;">
+                <span class="fi-item">📄 <span class="fi-name" id="fileName">—</span></span>
+                <span class="fi-item">📋 Colunas: <span class="fi-value" id="colCount">0</span></span>
+                <span class="fi-item">📝 Linhas: <span class="fi-value" id="rowCount">0</span></span>
+                <span class="fi-item">💰 Total Divergências: <span class="fi-value" id="totalDiv">R$ 0</span></span>
+            </div>
+        </div>
+
+        <!-- Conteúdo principal -->
+        <div id="mainContent" style="display:none;">
+
+            <!-- KPIs rápidos -->
+            <div class="kpi-grid" id="kpiGrid"></div>
+
+            <!-- Filtros de Segmentação -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="statusFilter">🔽 Status:</label>
+                    <select id="statusFilter">
+                        <option value="Todos">📌 Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="tipoFilter">📌 Tipo Divergência:</label>
+                    <select id="tipoFilter">
+                        <option value="Todos">📌 Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="turnoFilter">🕒 Turno:</label>
+                    <select id="turnoFilter">
+                        <option value="Todos">📌 Todos</option>
+                        <option value="1º Turno">1º Turno</option>
+                        <option value="2º Turno">2º Turno</option>
+                        <option value="3º Turno">3º Turno</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="flex-wrap: wrap;">
+                    <label for="dateMode">📅 Data:</label>
+                    <select id="dateMode" style="min-width: 130px;">
+                        <option value="none">Nenhum filtro</option>
+                        <option value="single">Dia específico</option>
+                        <option value="range">Intervalo</option>
+                        <option value="month">Mês inteiro</option>
+                    </select>
+                    <span id="dateInputs" style="display: flex; gap: 6px; align-items: center;"></span>
+                </div>
+                <div class="search-intelligent">
+                    <label style="font-weight: 700; font-size: 0.85rem;">🔎 Buscar loja:</label>
+                    <input type="text" id="smartSearch" placeholder="Nº loja ou nome..." autocomplete="off">
+                    <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs" id="tabNav">
+                <button class="tab-btn active" data-tab="tab-dados">📋 Dados Brutos</button>
+                <button class="tab-btn" data-tab="tab-tipo">📌 Por Tipo de Divergência</button>
+                <button class="tab-btn" data-tab="tab-loja">🏪 Por Loja</button>
+                <button class="tab-btn" data-tab="tab-item">🛒 Por Item</button>
+                <button class="tab-btn" data-tab="tab-chamado">🎫 Por Chamado</button>
+            </div>
+
+            <!-- Abas -->
+            <div class="tab-content active" id="tab-dados">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="header-left">📋 Tabela de Dados Brutos</div>
+                        <button class="btn-icon" onclick="copyTable('allTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                    </div>
+                    <div class="table-controls">
+                        <input type="text" class="search-input" id="searchAll" placeholder="🔍 Filtrar em todas as colunas...">
+                    </div>
+                    <div class="table-wrapper" id="allTableWrapper"></div>
+                    <div class="pagination" id="allPagination"></div>
+                </div>
+            </div>
+            <div class="tab-content" id="tab-tipo">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <div class="header-left">📊 Valor Total por Tipo de Divergência</div>
+                            <button class="btn-icon" id="btnCameraTipo" title="Salvar gráfico como imagem">📷 Salvar</button>
+                        </div>
+                        <div class="chart-container"><canvas id="chartTipo"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <div class="header-left">📋 Tabela por Tipo de Divergência</div>
+                            <button class="btn-icon" onclick="copyTable('tipoTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                        </div>
+                        <div class="table-wrapper" id="tipoTableWrapper"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content" id="tab-loja">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <div class="header-left">🏪 Top 10 Lojas por Valor de Divergência</div>
+                            <button class="btn-icon" id="btnCameraLoja" title="Salvar gráfico como imagem">📷 Salvar</button>
+                        </div>
+                        <div class="chart-container"><canvas id="chartLoja"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <div class="header-left">📋 Tabela por Loja</div>
+                            <button class="btn-icon" onclick="copyTable('lojaTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                        </div>
+                        <div class="table-wrapper" id="lojaTableWrapper"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content" id="tab-item">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <div class="header-left">🛒 Top 20 Itens por Valor de Divergência</div>
+                            <button class="btn-icon" id="btnCameraItem" title="Salvar gráfico como imagem">📷 Salvar</button>
+                        </div>
+                        <div class="chart-container"><canvas id="chartItem"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <div class="header-left">📋 Tabela por Item</div>
+                            <button class="btn-icon" onclick="copyTable('itemTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                        </div>
+                        <div class="table-wrapper" id="itemTableWrapper"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content" id="tab-chamado">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="header-left">🎫 Chamados com Valor de Divergência (🔴 > R$ 5.000)</div>
+                        <button class="btn-icon" onclick="copyTable('chamadoTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                    </div>
+                    <div class="table-wrapper" id="chamadoTableWrapper"></div>
+                    <div class="pagination" id="chamadoPagination"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado vazio -->
+        <div id="noDataMessage" class="card">
+            <div class="empty-state">
+                <span class="empty-icon">📂</span>
+                <p><strong>Nenhum dado carregado ainda.</strong></p>
+                <p style="color:var(--text-secondary);">Arraste um arquivo CSV para iniciar a análise.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            Chart.register(ChartDataLabels);
+
+            // Estado global
+            let allData = [];
+            let headers = [];
+            let filteredData = [];
+            let statusValues = [];
+            let tipoValues = [];
+            let idx = {};
+            let charts = {};
+
+            let allPage = 1;
+            const allPerPage = 50;
+            let allFiltered = [];
+            let chamadoPage = 1;
+            const chamadoPerPage = 30;
+
+            let smartSearchValue = '';
+
+            // Mapeamento de turnos por número de loja (N LOJA)
+            const turnoPorLoja = {
+                25: '3º Turno', 178: '3º Turno', 312: '3º Turno', 269: '3º Turno', 285: '3º Turno',
+                274: '3º Turno', 8: '3º Turno', 263: '3º Turno', 93: '3º Turno', 149: '3º Turno',
+                64: '3º Turno', 267: '3º Turno', 203: '3º Turno', 123: '3º Turno', 343: '3º Turno',
+                281: '3º Turno', 265: '3º Turno', 75: '3º Turno', 2: '3º Turno', 173: '3º Turno',
+                7: '3º Turno', 349: '3º Turno', 272: '3º Turno', 208: '3º Turno', 137: '3º Turno',
+                22: '3º Turno', 161: '3º Turno', 49: '3º Turno', 81: '3º Turno', 270: '3º Turno',
+                17: '3º Turno', 126: '3º Turno', 60: '3º Turno', 167: '3º Turno', 9: '3º Turno',
+                31: '3º Turno', 50: '3º Turno', 168: '3º Turno', 244: '3º Turno', 303: '3º Turno',
+                166: '3º Turno', 112: '3º Turno', 354: '3º Turno',
+                351: '1º Turno', 39: '1º Turno', 1: '1º Turno', 3: '1º Turno', 273: '1º Turno',
+                156: '1º Turno', 276: '1º Turno', 246: '1º Turno', 32: '1º Turno', 10: '1º Turno',
+                144: '1º Turno', 271: '1º Turno', 16: '1º Turno', 24: '1º Turno', 157: '1º Turno',
+                165: '1º Turno', 153: '1º Turno', 89: '1º Turno', 313: '1º Turno', 20: '1º Turno',
+                121: '1º Turno', 205: '1º Turno', 295: '1º Turno', 59: '1º Turno', 15: '1º Turno',
+                19: '1º Turno', 339: '1º Turno', 148: '1º Turno', 336: '1º Turno', 282: '1º Turno',
+                58: '1º Turno', 130: '1º Turno', 94: '1º Turno', 124: '1º Turno', 154: '1º Turno',
+                21: '1º Turno', 53: '1º Turno', 258: '1º Turno', 254: '1º Turno',
+                12: '2º Turno', 200: '2º Turno', 174: '2º Turno', 278: '2º Turno', 85: '2º Turno',
+                129: '2º Turno', 104: '2º Turno', 96: '2º Turno', 38: '2º Turno', 233: '2º Turno',
+                280: '2º Turno', 18: '2º Turno', 151: '2º Turno', 350: '2º Turno', 45: '2º Turno',
+                127: '2º Turno', 260: '2º Turno', 155: '2º Turno', 199: '2º Turno', 48: '2º Turno',
+                279: '2º Turno', 74: '2º Turno', 209: '2º Turno', 337: '2º Turno', 68: '2º Turno',
+                86: '2º Turno', 275: '2º Turno', 73: '2º Turno', 240: '2º Turno', 327: '2º Turno',
+                326: '2º Turno', 61: '2º Turno', 301: '2º Turno', 14: '2º Turno', 63: '2º Turno',
+                237: '2º Turno'
+            };
+
+            // Modo escuro
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark');
+                const isDark = document.body.classList.contains('dark');
+                themeToggle.textContent = isDark ? '☀️' : '🌙';
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            });
+            // Carregar tema salvo
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+                themeToggle.textContent = '☀️';
+            }
+
+            function toast(msg, type = 'success') {
+                const old = document.querySelector('.toast');
+                if (old) old.remove();
+                const t = document.createElement('div');
+                t.className = `toast ${type}`;
+                t.textContent = msg;
+                document.body.appendChild(t);
+                setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; }, 3000);
+                setTimeout(() => t.remove(), 3500);
+            }
+
+            function parseBrazilianNumber(str) {
+                if (typeof str === 'number') return str;
+                if (!str || typeof str !== 'string') return NaN;
+                let s = str.trim();
+                if (s.includes(',') && s.includes('.')) {
+                    s = s.replace(/\./g, '').replace(',', '.');
+                } else if (s.includes(',') && !s.includes('.')) {
+                    s = s.replace(',', '.');
+                }
+                const num = parseFloat(s);
+                return isNaN(num) ? NaN : num;
+            }
+
+            function parseDate(str) {
+                if (!str) return null;
+                str = String(str).trim();
+                const parts = str.split(/[\/\-\.]/);
+                if (parts.length === 3) {
+                    const day = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10) - 1;
+                    let year = parseInt(parts[2], 10);
+                    if (year < 100) year += 2000;
+                    if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                        return new Date(year, month, day);
+                    }
+                }
+                const d = new Date(str);
+                return isNaN(d.getTime()) ? null : d;
+            }
+
+            function extrairNLoja(lojaDestino) {
+                if (!lojaDestino) return '';
+                const str = String(lojaDestino);
+                const idx = str.indexOf('- ');
+                if (idx !== -1) {
+                    return str.substring(idx + 2).trim();
+                }
+                return '';
+            }
+
+            const dropzone = document.getElementById('dropzone');
+            const fileInput = document.getElementById('fileInput');
+            dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+            dropzone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropzone.classList.remove('drag-over');
+                handleFile(e.dataTransfer.files[0]);
+            });
+            dropzone.addEventListener('click', e => {
+                if (e.target.tagName !== 'LABEL' && e.target.tagName !== 'BUTTON') fileInput.click();
+            });
+            fileInput.addEventListener('change', () => {
+                handleFile(fileInput.files[0]);
+                fileInput.value = '';
+            });
+
+            function handleFile(file) {
+                if (!file) return;
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (!['csv', 'tsv', 'txt'].includes(ext)) return toast('⚠️ Selecione um arquivo CSV válido.', 'error');
+                toast('⏳ Processando...', 'success');
+                Papa.parse(file, {
+                    header: true,
+                    dynamicTyping: false,
+                    skipEmptyLines: true,
+                    encoding: 'UTF-8',
+                    complete: function(res) {
+                        if (!res.data || res.data.length === 0) return toast('Arquivo vazio.', 'error');
+                        allData = res.data.filter(r => Object.values(r).some(v => v !== null && v !== undefined && v !== ''));
+                        headers = res.meta.fields || [];
+                        if (headers.length === 0) return toast('Sem colunas.', 'error');
+
+                        headers.push('N LOJA');
+                        mapColumns();
+                        const statusCol = getCol('status');
+                        const tipoCol = getCol('tipoDivergencia');
+                        const valorCol = getCol('valorDivergencia');
+                        const dataCol = getCol('abertoEm');
+                        const lojaCol = getCol('lojaDestino');
+
+                        allData.forEach(row => {
+                            if (lojaCol) {
+                                row['N LOJA'] = extrairNLoja(row[lojaCol]);
+                            } else {
+                                row['N LOJA'] = '';
+                            }
+                            if (statusCol) {
+                                let val = row[statusCol];
+                                if (val === null || val === undefined || String(val).trim() === '') {
+                                    row[statusCol] = 'Em Aberto';
+                                } else {
+                                    row[statusCol] = String(val).trim();
+                                }
+                            }
+                            if (tipoCol) {
+                                let val = row[tipoCol];
+                                if (val === null || val === undefined || String(val).trim() === '') {
+                                    row[tipoCol] = 'Não informado';
+                                } else {
+                                    row[tipoCol] = String(val).trim();
+                                }
+                            }
+                            if (valorCol && row[valorCol] !== null && row[valorCol] !== undefined) {
+                                const converted = parseBrazilianNumber(String(row[valorCol]));
+                                row[valorCol] = !isNaN(converted) ? converted : 0;
+                            }
+                            if (dataCol) {
+                                const d = parseDate(row[dataCol]);
+                                row['_dataObj'] = d;
+                            }
+                        });
+
+                        const statusSet = new Set();
+                        const tipoSet = new Set();
+                        allData.forEach(r => {
+                            if (statusCol) statusSet.add(r[statusCol]);
+                            if (tipoCol) tipoSet.add(r[tipoCol]);
+                        });
+                        statusValues = Array.from(statusSet).sort();
+                        tipoValues = Array.from(tipoSet).sort();
+                        populateFilters();
+                        populateDateMode();
+                        setupSmartSearch();
+
+                        document.getElementById('fileName').textContent = file.name;
+                        document.getElementById('colCount').textContent = headers.length;
+                        document.getElementById('rowCount').textContent = allData.length.toLocaleString('pt-BR');
+                        const totalDiv = computeTotalDivergencia(allData);
+                        document.getElementById('totalDiv').textContent = formatCurrency(totalDiv);
+                        document.getElementById('fileInfo').style.display = 'flex';
+                        document.getElementById('mainContent').style.display = 'block';
+                        document.getElementById('noDataMessage').style.display = 'none';
+                        resetTabs();
+                        applyAllFilters();
+                        renderAll();
+                        toast('✅ Carregado! Total: ' + formatCurrency(totalDiv), 'success');
+                    },
+                    error: () => toast('Erro ao ler o arquivo.', 'error'),
+                });
+            }
+
+            function mapColumns() {
+                const mappings = [
+                    ['abertoEm', ['Aberto em', 'aberto em', 'ABERTO EM', 'Data de abertura']],
+                    ['caseTask', ['Case Task', 'case task', 'CASE TASK', 'Número do chamado', 'numero chamado', 'chamado']],
+                    ['tipoDivergencia', ['Tipo da divergência', 'tipo da divergencia', 'TIPO DA DIVERGÊNCIA', 'Tipo divergencia', 'Divergência', 'Tipo']],
+                    ['numeroCarga', ['Número da carga de expedição', 'numero da carga', 'Número da carga', 'Carga']],
+                    ['cdOrigem', ['CD de Origem', 'cd de origem', 'CD Origem', 'Origem']],
+                    ['lojaDestino', ['Loja de Destino', 'loja de destino', 'Loja Destino', 'Destino', 'loja', 'LOJA']],
+                    ['codigoProduto', ['Código do produto/item', 'codigo do produto', 'Código produto', 'codigo produto', 'Código', 'codigo', 'SKU']],
+                    ['descricaoProduto', ['Descrição do produto/item', 'descricao do produto', 'Descrição produto', 'descricao produto', 'Produto', 'Descrição']],
+                    ['lote', ['Lote', 'lote', 'LOTE']],
+                    ['valorDivergencia', ['Custo total do item (UN)', 'custo total do item', 'Custo total', 'Valor divergência', 'valor divergencia', 'Valor', 'Custo']],
+                    ['status', ['Status', 'status', 'STATUS', 'Estado', 'estado']],
+                    ['quantidadeNF', ['Quantidade da Nota Fiscal', 'quantidade nota fiscal', 'Quantidade NF']],
+                ];
+
+                for (let [key, possibleNames] of mappings) {
+                    for (let name of possibleNames) {
+                        const found = headers.find(h => h.trim().toLowerCase() === name.toLowerCase());
+                        if (found) {
+                            idx[key] = headers.indexOf(found);
+                            break;
+                        }
+                    }
+                    if (idx[key] === undefined) {
+                        for (let name of possibleNames) {
+                            const found = headers.find(h => h.toLowerCase().includes(name.toLowerCase()));
+                            if (found) {
+                                idx[key] = headers.indexOf(found);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (idx.tipoDivergencia === undefined && headers.length > 15) idx.tipoDivergencia = 15;
+                if (idx.valorDivergencia === undefined && headers.length > 32) idx.valorDivergencia = 32;
+                if (idx.codigoProduto === undefined && headers.length > 22) idx.codigoProduto = 22;
+                if (idx.lojaDestino === undefined && headers.length > 21) idx.lojaDestino = 21;
+                if (idx.caseTask === undefined && headers.length > 6) idx.caseTask = 6;
+                if (idx.abertoEm === undefined && headers.length > 0) idx.abertoEm = 0;
+                if (idx.status === undefined && headers.length > 36) idx.status = 36;
+                idx.descricaoProduto = 23;
+            }
+
+            function getCol(key) {
+                return idx[key] !== undefined ? headers[idx[key]] : null;
+            }
+
+            function computeTotalDivergencia(data) {
+                const col = getCol('valorDivergencia');
+                if (!col) return 0;
+                return data.reduce((sum, r) => sum + (typeof r[col] === 'number' ? r[col] : 0), 0);
+            }
+
+            function formatCurrency(val) {
+                return 'R$ ' + Math.round(val).toLocaleString('pt-BR');
+            }
+
+            function formatNumber(val) {
+                return Math.round(val).toLocaleString('pt-BR');
+            }
+
+            function formatK(val) {
+                if (val >= 1000) {
+                    const k = Math.round(val / 1000);
+                    return k + 'k';
+                }
+                return Math.round(val).toString();
+            }
+
+            function escapeHTML(str) {
+                const div = document.createElement('div');
+                div.textContent = str || '';
+                return div.innerHTML;
+            }
+
+            function downloadChart(chartId, filename) {
+                const chart = charts[chartId];
+                if (!chart) return toast('Gráfico não disponível.', 'error');
+                const url = chart.toBase64Image('image/png', 1.0);
+                const link = document.createElement('a');
+                link.download = filename + '.png';
+                link.href = url;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                toast('📷 Gráfico salvo!', 'success');
+            }
+
+            window.copyTable = function(tableWrapperId) {
+                const wrapper = document.getElementById(tableWrapperId);
+                if (!wrapper) return toast('Tabela não encontrada.', 'error');
+                const table = wrapper.querySelector('table');
+                if (!table) return toast('Nenhuma tabela para copiar.', 'warning');
+                const range = document.createRange();
+                range.selectNodeContents(table);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                try {
+                    document.execCommand('copy');
+                    toast('📋 Tabela copiada (com cabeçalho)!', 'success');
+                } catch (err) {
+                    toast('Falha ao copiar.', 'error');
+                }
+                selection.removeAllRanges();
+            };
+
+            document.getElementById('btnCameraTipo').addEventListener('click', () => downloadChart('chartTipo', 'divergencias_por_tipo'));
+            document.getElementById('btnCameraLoja').addEventListener('click', () => downloadChart('chartLoja', 'divergencias_por_loja'));
+            document.getElementById('btnCameraItem').addEventListener('click', () => downloadChart('chartItem', 'divergencias_por_item'));
+
+            function populateDateMode() {
+                const dateMode = document.getElementById('dateMode');
+                dateMode.value = 'none';
+                updateDateInputs('none');
+                dateMode.addEventListener('change', () => {
+                    updateDateInputs(dateMode.value);
+                    applyAllFilters();
+                    renderAll();
+                });
+            }
+
+            function updateDateInputs(mode) {
+                const container = document.getElementById('dateInputs');
+                container.innerHTML = '';
+                if (mode === 'none') {
+                    container.style.display = 'none';
+                } else if (mode === 'single') {
+                    container.style.display = 'flex';
+                    container.innerHTML = '<input type="date" id="singleDate" title="Selecione um dia">';
+                    document.getElementById('singleDate').addEventListener('change', () => { applyAllFilters(); renderAll(); });
+                } else if (mode === 'range') {
+                    container.style.display = 'flex';
+                    container.innerHTML = '<input type="date" id="startDate" title="Data inicial"> até <input type="date" id="endDate" title="Data final">';
+                    document.getElementById('startDate').addEventListener('change', () => { applyAllFilters(); renderAll(); });
+                    document.getElementById('endDate').addEventListener('change', () => { applyAllFilters(); renderAll(); });
+                } else if (mode === 'month') {
+                    container.style.display = 'flex';
+                    container.innerHTML = '<input type="month" id="monthPicker" title="Selecione o mês">';
+                    document.getElementById('monthPicker').addEventListener('change', () => { applyAllFilters(); renderAll(); });
+                }
+            }
+
+            function getDateFilterFn() {
+                const mode = document.getElementById('dateMode').value;
+                const dataCol = getCol('abertoEm');
+                if (!dataCol || mode === 'none') return () => true;
+
+                return function(row) {
+                    const dateObj = row['_dataObj'];
+                    if (!dateObj) return false;
+                    if (mode === 'single') {
+                        const input = document.getElementById('singleDate');
+                        if (!input || !input.value) return true;
+                        const filterDate = new Date(input.value + 'T00:00:00');
+                        return dateObj.toDateString() === filterDate.toDateString();
+                    } else if (mode === 'range') {
+                        const startInput = document.getElementById('startDate');
+                        const endInput = document.getElementById('endDate');
+                        const start = startInput && startInput.value ? new Date(startInput.value + 'T00:00:00') : null;
+                        const end = endInput && endInput.value ? new Date(endInput.value + 'T23:59:59') : null;
+                        if (start && dateObj < start) return false;
+                        if (end && dateObj > end) return false;
+                        return true;
+                    } else if (mode === 'month') {
+                        const monthInput = document.getElementById('monthPicker');
+                        if (!monthInput || !monthInput.value) return true;
+                        const [year, month] = monthInput.value.split('-').map(Number);
+                        return dateObj.getFullYear() === year && dateObj.getMonth() === (month - 1);
+                    }
+                    return true;
+                };
+            }
+
+            function populateFilters() {
+                const statusSelect = document.getElementById('statusFilter');
+                statusSelect.innerHTML = '<option value="Todos">📌 Todos</option>';
+                statusValues.forEach(s => {
+                    const option = document.createElement('option');
+                    option.value = s;
+                    option.textContent = s;
+                    statusSelect.appendChild(option);
+                });
+                statusSelect.value = 'Todos';
+
+                const tipoSelect = document.getElementById('tipoFilter');
+                tipoSelect.innerHTML = '<option value="Todos">📌 Todos</option>';
+                tipoValues.forEach(t => {
+                    const option = document.createElement('option');
+                    option.value = t;
+                    option.textContent = t;
+                    tipoSelect.appendChild(option);
+                });
+                tipoSelect.value = 'Todos';
+
+                statusSelect.addEventListener('change', () => { applyAllFilters(); renderAll(); });
+                tipoSelect.addEventListener('change', () => { applyAllFilters(); renderAll(); });
+                document.getElementById('turnoFilter').addEventListener('change', () => { applyAllFilters(); renderAll(); });
+            }
+
+            function setupSmartSearch() {
+                const input = document.getElementById('smartSearch');
+                const dropdown = document.getElementById('suggestionsDropdown');
+
+                input.addEventListener('input', function() {
+                    const term = this.value.trim();
+                    if (term.length === 0) {
+                        dropdown.style.display = 'none';
+                        smartSearchValue = '';
+                        applyAllFilters();
+                        renderAll();
+                        return;
+                    }
+
+                    const isNumeric = /^\d+$/.test(term);
+                    let suggestions = [];
+
+                    if (isNumeric) {
+                        const nLojaCol = 'N LOJA';
+                        const valores = allData.map(r => String(r[nLojaCol] || '')).filter(v => v.includes(term));
+                        suggestions = [...new Set(valores)].sort();
+                    } else {
+                        const lojaCol = getCol('lojaDestino');
+                        if (lojaCol) {
+                            const valores = allData.map(r => String(r[lojaCol] || '')).filter(v => v.toLowerCase().includes(term.toLowerCase()));
+                            suggestions = [...new Set(valores)].sort();
+                        }
+                    }
+
+                    suggestions = suggestions.slice(0, 10);
+
+                    if (suggestions.length > 0) {
+                        dropdown.innerHTML = suggestions.map(s => `<div class="suggestion-item" data-value="${escapeHTML(s)}">${escapeHTML(s)}</div>`).join('');
+                        dropdown.style.display = 'block';
+                    } else {
+                        dropdown.style.display = 'none';
+                    }
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        smartSearchValue = this.value.trim();
+                        dropdown.style.display = 'none';
+                        applyAllFilters();
+                        renderAll();
+                    }
+                });
+
+                dropdown.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('suggestion-item')) {
+                        const value = e.target.dataset.value;
+                        input.value = value;
+                        smartSearchValue = value;
+                        dropdown.style.display = 'none';
+                        applyAllFilters();
+                        renderAll();
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+            }
+
+            function applyAllFilters() {
+                const selectedStatus = document.getElementById('statusFilter').value;
+                const selectedTipo = document.getElementById('tipoFilter').value;
+                const selectedTurno = document.getElementById('turnoFilter').value;
+                const dateFilterFn = getDateFilterFn();
+
+                filteredData = [...allData];
+                filteredData = filteredData.filter(dateFilterFn);
+
+                if (selectedStatus !== 'Todos') {
+                    const statusCol = getCol('status');
+                    if (statusCol) filteredData = filteredData.filter(r => r[statusCol] === selectedStatus);
+                }
+                if (selectedTipo !== 'Todos') {
+                    const tipoCol = getCol('tipoDivergencia');
+                    if (tipoCol) filteredData = filteredData.filter(r => r[tipoCol] === selectedTipo);
+                }
+
+                // Filtro por turno (baseado na coluna N LOJA)
+                if (selectedTurno !== 'Todos') {
+                    filteredData = filteredData.filter(r => {
+                        const nLoja = String(r['N LOJA'] || '').trim();
+                        if (!nLoja) return false;
+                        const lojaNum = parseInt(nLoja, 10);
+                        if (isNaN(lojaNum)) return false;
+                        return turnoPorLoja[lojaNum] === selectedTurno;
+                    });
+                }
+
+                // Filtro inteligente de loja
+                if (smartSearchValue) {
+                    const isNumeric = /^\d+$/.test(smartSearchValue);
+                    if (isNumeric) {
+                        filteredData = filteredData.filter(r => String(r['N LOJA'] || '') === smartSearchValue);
+                    } else {
+                        const lojaCol = getCol('lojaDestino');
+                        if (lojaCol) {
+                            filteredData = filteredData.filter(r => String(r[lojaCol] || '').toLowerCase() === smartSearchValue.toLowerCase());
+                        }
+                    }
+                }
+
+                document.getElementById('searchAll').value = '';
+                allFiltered = [...filteredData];
+                allPage = 1;
+                chamadoPage = 1;
+            }
+
+            function resetTabs() {
+                document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+                document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === 0));
+            }
+
+            document.getElementById('tabNav').addEventListener('click', e => {
+                if (e.target.classList.contains('tab-btn')) {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    const id = e.target.dataset.tab;
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    document.getElementById(id).classList.add('active');
+                    setTimeout(() => {
+                        Object.values(charts).forEach(c => { if (c && c.resize) c.resize(); });
+                    }, 150);
+                }
+            });
+
+            function renderKPIs() {
+                const data = filteredData;
+                const totalDiv = computeTotalDivergencia(data);
+                const colLoja = getCol('lojaDestino');
+                const lojasUnicas = colLoja ? new Set(data.map(r => r[colLoja]).filter(Boolean)).size : 0;
+                const colTipo = getCol('tipoDivergencia');
+                const tiposUnicos = colTipo ? new Set(data.map(r => r[colTipo]).filter(Boolean)).size : 0;
+                const colChamado = getCol('caseTask');
+                const chamadosUnicos = colChamado ? new Set(data.map(r => r[colChamado]).filter(Boolean)).size : 0;
+                const chamadosAcima5k = colChamado && getCol('valorDivergencia') ?
+                    aggregateByCol('caseTask', 'valorDivergencia', data).filter(r => r.total > 5000).length : 0;
+
+                document.getElementById('kpiGrid').innerHTML = `
+                    <div class="kpi-card"><span class="kpi-label">💰 Total Divergências</span><span class="kpi-value">${formatCurrency(totalDiv)}</span></div>
+                    <div class="kpi-card"><span class="kpi-label">🏪 Lojas Envolvidas</span><span class="kpi-value">${formatNumber(lojasUnicas)}</span></div>
+                    <div class="kpi-card"><span class="kpi-label">📌 Tipos de Divergência</span><span class="kpi-value">${formatNumber(tiposUnicos)}</span></div>
+                    <div class="kpi-card"><span class="kpi-label">🎫 Chamados</span><span class="kpi-value">${formatNumber(chamadosUnicos)}</span></div>
+                    <div class="kpi-card"><span class="kpi-label">🔴 Chamados > R$ 5.000</span><span class="kpi-value danger">${formatNumber(chamadosAcima5k)}</span></div>
+                `;
+            }
+
+            function aggregateByCol(key, valueKey = 'valorDivergencia', data = filteredData) {
+                const col = getCol(key);
+                const valCol = getCol(valueKey);
+                if (!col || !valCol) return [];
+                const map = {};
+                data.forEach(r => {
+                    const k = r[col] !== null && r[col] !== undefined ? String(r[col]) : '(vazio)';
+                    const v = typeof r[valCol] === 'number' && !isNaN(r[valCol]) ? r[valCol] : 0;
+                    if (!map[k]) map[k] = { key: k, total: 0, count: 0 };
+                    map[k].total += v;
+                    map[k].count += 1;
+                });
+                return Object.values(map).sort((a, b) => b.total - a.total);
+            }
+
+            function renderTable(containerId, columns, data, options = {}) {
+                const { sortable = true, highlightCol = null, highlightThreshold = null, highlightClass = 'highlight-red', colFormatters = [] } = options;
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                if (data.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><span class="empty-icon">📭</span><p>Nenhum dado disponível.</p></div>';
+                    return;
+                }
+                let html = '<table><thead><tr>';
+                columns.forEach((col, i) => {
+                    html += `<th class="${sortable ? 'sortable' : ''}" data-colidx="${i}">${escapeHTML(col)} ${sortable ? '<span class="sort-icon">⇅</span>' : ''}</th>`;
+                });
+                html += '</tr></thead><tbody>';
+                data.forEach(row => {
+                    let highlight = false;
+                    if (highlightCol !== null && highlightThreshold !== null) {
+                        const val = row[highlightCol];
+                        if (typeof val === 'number' && val > highlightThreshold) highlight = true;
+                    }
+                    html += `<tr class="${highlight ? highlightClass : ''}">`;
+                    row.forEach((cell, idx) => {
+                        let display = cell;
+                        if (colFormatters[idx]) {
+                            display = colFormatters[idx](cell);
+                        } else if (typeof cell === 'number') {
+                            display = formatNumber(cell);
+                        }
+                        html += `<td>${escapeHTML(String(display ?? ''))}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                html += '</tbody></table>';
+                container.innerHTML = html;
+                if (sortable) {
+                    container.querySelectorAll('th.sortable').forEach(th => {
+                        th.addEventListener('click', () => {
+                            const colIdx = parseInt(th.dataset.colidx);
+                            const sorted = [...data].sort((a, b) => {
+                                const va = a[colIdx];
+                                const vb = b[colIdx];
+                                if (typeof va === 'number' && typeof vb === 'number') return va - vb;
+                                return String(va ?? '').localeCompare(String(vb ?? ''));
+                            });
+                            if (th.classList.contains('sorted-asc')) {
+                                sorted.reverse();
+                                th.classList.remove('sorted-asc');
+                                th.classList.add('sorted-desc');
+                                th.querySelector('.sort-icon').textContent = ' ▼';
+                            } else {
+                                th.classList.remove('sorted-desc');
+                                th.classList.add('sorted-asc');
+                                th.querySelector('.sort-icon').textContent = ' ▲';
+                            }
+                            renderTable(containerId, columns, sorted, options);
+                        });
+                    });
+                }
+            }
+
+            function renderBarChart(canvasId, labels, values, title, datalabelOverrides = {}) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+                if (charts[canvasId]) charts[canvasId].destroy();
+                const ctx = canvas.getContext('2d');
+
+                const defaultDatalabels = {
+                    rotation: 0,
+                    align: 'top',
+                    anchor: 'end',
+                    offset: 4,
+                    formatter: (value) => formatCurrency(value),
+                    font: { weight: 'bold', size: 14 },
+                    color: '#1e293b',
+                };
+                const finalDatalabels = { ...defaultDatalabels, ...datalabelOverrides };
+
+                charts[canvasId] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Valor Total',
+                            data: values,
+                            backgroundColor: '#2563eb',
+                            borderRadius: 6,
+                            borderSkipped: false,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: { padding: { top: 20 } },
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: !!title, text: title, font: { size: 14 } },
+                            tooltip: { callbacks: { label: ctx => formatCurrency(ctx.parsed.y) } },
+                            datalabels: finalDatalabels,
+                        },
+                        scales: {
+                            x: { ticks: { maxRotation: 45, font: { size: 10 } } },
+                            y: { beginAtZero: true, ticks: { callback: v => formatCurrency(v) } }
+                        }
+                    },
+                });
+            }
+
+            function renderAll() {
+                renderKPIs();
+                renderDadosBrutos();
+                renderTipoDivergencia();
+                renderLoja();
+                renderItem();
+                renderChamados();
+                setTimeout(() => {
+                    Object.values(charts).forEach(c => { if (c && c.resize) c.resize(); });
+                }, 200);
+            }
+
+            function renderDadosBrutos() {
+                allFiltered = [...filteredData];
+                const searchInput = document.getElementById('searchAll');
+                searchInput.value = '';
+                searchInput.oninput = () => {
+                    const term = searchInput.value.toLowerCase();
+                    allFiltered = filteredData.filter(r =>
+                        headers.some(h => String(r[h] ?? '').toLowerCase().includes(term))
+                    );
+                    allPage = 1;
+                    renderAllTablePage();
+                };
+                allPage = 1;
+                renderAllTablePage();
+            }
+
+            function renderAllTablePage() {
+                const total = allFiltered.length;
+                const totalPages = Math.ceil(total / allPerPage) || 1;
+                if (allPage > totalPages) allPage = totalPages;
+                const start = (allPage - 1) * allPerPage;
+                const pageData = allFiltered.slice(start, start + allPerPage);
+                const rows = pageData.map(r => headers.map(c => r[c]));
+                renderTable('allTableWrapper', headers, rows, { sortable: true });
+                let pagHTML = '';
+                if (totalPages > 1) {
+                    pagHTML += `<button ${allPage===1?'disabled':''} data-p="prev">◀</button>`;
+                    for (let p = 1; p <= totalPages; p++) {
+                        if (totalPages > 15 && p > 3 && p < totalPages - 2 && Math.abs(p - allPage) > 2) {
+                            if (p === 4) pagHTML += '<span>…</span>';
+                            continue;
+                        }
+                        pagHTML += `<button data-p="${p}" class="${p===allPage?'active-page':''}">${p}</button>`;
+                    }
+                    pagHTML += `<button ${allPage===totalPages?'disabled':''} data-p="next">▶</button>`;
+                }
+                document.getElementById('allPagination').innerHTML = pagHTML;
+                document.getElementById('allPagination').onclick = (e) => {
+                    const p = e.target.dataset.p;
+                    if (p === 'prev') allPage = Math.max(1, allPage - 1);
+                    else if (p === 'next') allPage = Math.min(totalPages, allPage + 1);
+                    else if (p) allPage = parseInt(p);
+                    else return;
+                    renderAllTablePage();
+                };
+            }
+
+            function renderTipoDivergencia() {
+                const agg = aggregateByCol('tipoDivergencia');
+                const columns = ['Tipo de Divergência', 'Total Divergência', 'Qtd Ocorrências'];
+                const rows = agg.map(r => [r.key, r.total, r.count]);
+                const formatters = [null, formatCurrency, formatNumber];
+                renderTable('tipoTableWrapper', columns, rows, { sortable: true, colFormatters: formatters });
+                if (agg.length > 0) {
+                    renderBarChart('chartTipo', agg.map(r => r.key), agg.map(r => r.total), 'Valor por Tipo');
+                }
+            }
+
+            function renderLoja() {
+                const agg = aggregateByCol('lojaDestino');
+                const columns = ['Loja Destino', 'Total Divergência', 'Qtd Ocorrências'];
+                const rows = agg.map(r => [r.key, r.total, r.count]);
+                const formatters = [null, formatCurrency, formatNumber];
+                renderTable('lojaTableWrapper', columns, rows, { sortable: true, colFormatters: formatters });
+                if (agg.length > 0) {
+                    const top = agg.slice(0, 10);
+                    renderBarChart('chartLoja', top.map(r => r.key), top.map(r => r.total), 'Top 10 Lojas', {
+                        formatter: (value) => formatK(value),
+                    });
+                }
+            }
+
+            function renderItem() {
+                const colDesc = getCol('descricaoProduto');
+                const colVal = getCol('valorDivergencia');
+                const map = {};
+                if (colDesc && colVal) {
+                    filteredData.forEach(r => {
+                        const desc = String(r[colDesc] ?? 'N/A');
+                        const v = typeof r[colVal] === 'number' && !isNaN(r[colVal]) ? r[colVal] : 0;
+                        if (!map[desc]) map[desc] = { key: desc, total: 0, count: 0 };
+                        map[desc].total += v;
+                        map[desc].count += 1;
+                    });
+                }
+                const agg = Object.values(map).sort((a, b) => b.total - a.total);
+                const columns = ['Item (Descrição)', 'Total Divergência', 'Qtd Ocorrências'];
+                const rows = agg.map(r => [r.key, r.total, r.count]);
+                const formatters = [null, formatCurrency, formatNumber];
+                renderTable('itemTableWrapper', columns, rows, { sortable: true, colFormatters: formatters });
+                if (agg.length > 0) {
+                    const top = agg.slice(0, 20);
+                    const shortLabels = top.map(r => r.key.length > 25 ? r.key.substring(0, 22) + '...' : r.key);
+                    renderBarChart('chartItem', shortLabels, top.map(r => r.total), 'Top 20 Itens', {
+                        formatter: (value) => formatK(value),
+                    });
+                }
+            }
+
+            function renderChamados() {
+                const colChamado = getCol('caseTask');
+                const colAberto = getCol('abertoEm');
+                const colStatus = getCol('status');
+                const colLoja = getCol('lojaDestino');
+                const colVal = getCol('valorDivergencia');
+                const colTipo = getCol('tipoDivergencia');
+
+                const map = {};
+                if (colChamado && colVal) {
+                    filteredData.forEach(r => {
+                        const chamado = String(r[colChamado] ?? 'N/A');
+                        const v = typeof r[colVal] === 'number' && !isNaN(r[colVal]) ? r[colVal] : 0;
+                        if (!map[chamado]) {
+                            map[chamado] = {
+                                chamado,
+                                total: 0,
+                                data: colAberto ? String(r[colAberto] ?? '') : '',
+                                status: colStatus ? String(r[colStatus] ?? '') : '',
+                                loja: colLoja ? String(r[colLoja] ?? '') : '',
+                                tipo: colTipo ? String(r[colTipo] ?? '') : '',
+                            };
+                        }
+                        map[chamado].total += v;
+                    });
+                }
+                let agg = Object.values(map).sort((a, b) => b.total - a.total);
+                const columns = ['Chamado', 'Data Abertura', 'Loja', 'Status', 'Tipo Divergência', 'Total Divergência'];
+                const rows = agg.map(r => [r.chamado, r.data, r.loja, r.status, r.tipo, r.total]);
+                const formatters = [null, null, null, null, null, formatCurrency];
+
+                window._chamadoData = rows;
+                window._chamadoColumns = columns;
+                window._chamadoFormatters = formatters;
+                chamadoPage = 1;
+                renderChamadoPage();
+            }
+
+            function renderChamadoPage() {
+                const data = window._chamadoData || [];
+                const columns = window._chamadoColumns || [];
+                const formatters = window._chamadoFormatters || [];
+                const total = data.length;
+                const totalPages = Math.ceil(total / chamadoPerPage) || 1;
+                if (chamadoPage > totalPages) chamadoPage = totalPages;
+                const start = (chamadoPage - 1) * chamadoPerPage;
+                const pageData = data.slice(start, start + chamadoPerPage);
+
+                renderTable('chamadoTableWrapper', columns, pageData, {
+                    sortable: false,
+                    highlightCol: 5,
+                    highlightThreshold: 5000,
+                    highlightClass: 'highlight-red',
+                    colFormatters: formatters
+                });
+
+                let pagHTML = '';
+                if (totalPages > 1) {
+                    pagHTML += `<button ${chamadoPage===1?'disabled':''} data-p="prev">◀</button>`;
+                    for (let p = 1; p <= totalPages; p++) {
+                        if (totalPages > 15 && p > 3 && p < totalPages - 2 && Math.abs(p - chamadoPage) > 2) {
+                            if (p === 4) pagHTML += '<span>…</span>';
+                            continue;
+                        }
+                        pagHTML += `<button data-p="${p}" class="${p===chamadoPage?'active-page':''}">${p}</button>`;
+                    }
+                    pagHTML += `<button ${chamadoPage===totalPages?'disabled':''} data-p="next">▶</button>`;
+                }
+                document.getElementById('chamadoPagination').innerHTML = pagHTML;
+                document.getElementById('chamadoPagination').onclick = (e) => {
+                    const p = e.target.dataset.p;
+                    if (p === 'prev') chamadoPage = Math.max(1, chamadoPage - 1);
+                    else if (p === 'next') chamadoPage = Math.min(totalPages, chamadoPage + 1);
+                    else if (p) chamadoPage = parseInt(p);
+                    else return;
+                    renderChamadoPage();
+                };
+            }
+
+            console.log('📦 HelpVision V1.0 pronto. Créditos: Pablo Martins Lopes.');
+        })();
+    </script>
+</body>
+</html>
