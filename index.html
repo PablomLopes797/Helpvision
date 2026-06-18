@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📊 HelpVision 🔍 V1.0</title> 
+    <title>HelpVision 🔍 V1.0</title>
 
     <!-- Papa Parse -->
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Chart.js DataLabels Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 
     <style>
         :root {
@@ -495,6 +492,9 @@
             text-overflow: ellipsis;
             color: var(--text);
         }
+        tbody tr {
+            cursor: pointer;
+        }
         tbody tr:nth-child(even) {
             background: var(--table-row-even);
         }
@@ -731,6 +731,8 @@
                 <button class="tab-btn" data-tab="tab-loja">🏪 Por Loja</button>
                 <button class="tab-btn" data-tab="tab-item">🛒 Por Item</button>
                 <button class="tab-btn" data-tab="tab-chamado">🎫 Por Chamado</button>
+                <button class="tab-btn" data-tab="tab-status-valor">💰 Valor por Status</button>
+                <button class="tab-btn" data-tab="tab-aprovacao">📈 Índice de Aprovação</button>
             </div>
 
             <!-- Abas -->
@@ -787,7 +789,7 @@
                 <div class="charts-grid">
                     <div class="chart-card">
                         <div class="card-header">
-                            <div class="header-left">🛒 Top 20 Itens por Valor de Divergência</div>
+                            <div class="header-left">🛒 Top 10 Itens por Valor de Divergência</div>
                             <button class="btn-icon" id="btnCameraItem" title="Salvar gráfico como imagem">📷 Salvar</button>
                         </div>
                         <div class="chart-container"><canvas id="chartItem"></canvas></div>
@@ -809,6 +811,44 @@
                     </div>
                     <div class="table-wrapper" id="chamadoTableWrapper"></div>
                     <div class="pagination" id="chamadoPagination"></div>
+                </div>
+            </div>
+            <!-- Aba: Valor por Status -->
+            <div class="tab-content" id="tab-status-valor">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <div class="header-left">💰 Valor Total por Status</div>
+                            <button class="btn-icon" id="btnCameraStatus" title="Salvar gráfico como imagem">📷 Salvar</button>
+                        </div>
+                        <div class="chart-container"><canvas id="chartStatus"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <div class="header-left">📋 Tabela por Status</div>
+                            <button class="btn-icon" onclick="copyTable('statusTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                        </div>
+                        <div class="table-wrapper" id="statusTableWrapper"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Aba: Índice de Aprovação -->
+            <div class="tab-content" id="tab-aprovacao">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <div class="header-left">📈 Chamados por Turno (Total vs Autorizados)</div>
+                            <button class="btn-icon" id="btnCameraAprovacao" title="Salvar gráfico como imagem">📷 Salvar</button>
+                        </div>
+                        <div class="chart-container"><canvas id="chartAprovacao"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <div class="header-left">📋 Tabela de Aprovação por Turno</div>
+                            <button class="btn-icon" onclick="copyTable('aprovTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                        </div>
+                        <div class="table-wrapper" id="aprovTableWrapper"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -881,7 +921,6 @@
                 themeToggle.textContent = isDark ? '☀️' : '🌙';
                 localStorage.setItem('theme', isDark ? 'dark' : 'light');
             });
-            // Carregar tema salvo
             if (localStorage.getItem('theme') === 'dark') {
                 document.body.classList.add('dark');
                 themeToggle.textContent = '☀️';
@@ -928,6 +967,21 @@
                 return isNaN(d.getTime()) ? null : d;
             }
 
+            function nomeMesExtenso(date) {
+                const meses = [
+                    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+                    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+                ];
+                return meses[date.getMonth()];
+            }
+
+            function gerarKeyMes(date) {
+                if (!date || isNaN(date.getTime())) return '';
+                const mes = nomeMesExtenso(date);
+                const ano = date.getFullYear();
+                return `${mes} de ${ano}`;
+            }
+
             function extrairNLoja(lojaDestino) {
                 if (!lojaDestino) return '';
                 const str = String(lojaDestino);
@@ -936,6 +990,51 @@
                     return str.substring(idx + 2).trim();
                 }
                 return '';
+            }
+
+            // Exportar dados filtrados como CSV (separador ponto e vírgula)
+            function exportToCSV(dataArray, filename = 'exportacao.csv') {
+                const csv = Papa.unparse(dataArray, { delimiter: ";", header: true });
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+
+            // Duplo clique inteligente
+            function setupTableDoubleClick(containerId, colunaChave, exportAll = false) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                container.addEventListener('dblclick', function(e) {
+                    const target = e.target;
+                    if (target.tagName === 'TH') {
+                        // Cabeçalho: exporta tudo
+                        exportToCSV(filteredData, `${containerId}_all.csv`);
+                        toast(`📥 ${filteredData.length} registro(s) exportado(s)!`);
+                        return;
+                    }
+                    const tr = target.closest('tr');
+                    if (!tr) return;
+                    const valor = tr.dataset.valor;
+                    if (!valor) return;
+                    let dados;
+                    if (exportAll) {
+                        dados = filteredData.filter(r => String(r[colunaChave] || '') === valor);
+                    } else {
+                        dados = filteredData.filter(r => String(r[colunaChave] || '') === valor);
+                    }
+                    if (dados.length > 0) {
+                        exportToCSV(dados, `${colunaChave}_${valor}.csv`);
+                        toast(`📥 ${dados.length} registro(s) exportado(s)!`);
+                    } else {
+                        toast('⚠️ Nenhum dado para exportar.', 'warning');
+                    }
+                });
             }
 
             const dropzone = document.getElementById('dropzone');
@@ -964,7 +1063,7 @@
                     header: true,
                     dynamicTyping: false,
                     skipEmptyLines: true,
-                    encoding: 'UTF-8',
+                    encoding: 'Windows-1252',
                     complete: function(res) {
                         if (!res.data || res.data.length === 0) return toast('Arquivo vazio.', 'error');
                         allData = res.data.filter(r => Object.values(r).some(v => v !== null && v !== undefined && v !== ''));
@@ -972,6 +1071,8 @@
                         if (headers.length === 0) return toast('Sem colunas.', 'error');
 
                         headers.push('N LOJA');
+                        headers.push('KEY MÊS');
+                        
                         mapColumns();
                         const statusCol = getCol('status');
                         const tipoCol = getCol('tipoDivergencia');
@@ -985,6 +1086,16 @@
                             } else {
                                 row['N LOJA'] = '';
                             }
+
+                            if (dataCol) {
+                                const d = parseDate(row[dataCol]);
+                                row['_dataObj'] = d;
+                                row['KEY MÊS'] = d ? gerarKeyMes(d) : '';
+                            } else {
+                                row['_dataObj'] = null;
+                                row['KEY MÊS'] = '';
+                            }
+
                             if (statusCol) {
                                 let val = row[statusCol];
                                 if (val === null || val === undefined || String(val).trim() === '') {
@@ -1004,10 +1115,6 @@
                             if (valorCol && row[valorCol] !== null && row[valorCol] !== undefined) {
                                 const converted = parseBrazilianNumber(String(row[valorCol]));
                                 row[valorCol] = !isNaN(converted) ? converted : 0;
-                            }
-                            if (dataCol) {
-                                const d = parseDate(row[dataCol]);
-                                row['_dataObj'] = d;
                             }
                         });
 
@@ -1152,6 +1259,8 @@
             document.getElementById('btnCameraTipo').addEventListener('click', () => downloadChart('chartTipo', 'divergencias_por_tipo'));
             document.getElementById('btnCameraLoja').addEventListener('click', () => downloadChart('chartLoja', 'divergencias_por_loja'));
             document.getElementById('btnCameraItem').addEventListener('click', () => downloadChart('chartItem', 'divergencias_por_item'));
+            document.getElementById('btnCameraStatus').addEventListener('click', () => downloadChart('chartStatus', 'divergencias_por_status'));
+            document.getElementById('btnCameraAprovacao').addEventListener('click', () => downloadChart('chartAprovacao', 'indice_aprovacao'));
 
             function populateDateMode() {
                 const dateMode = document.getElementById('dateMode');
@@ -1190,30 +1299,38 @@
                 const dataCol = getCol('abertoEm');
                 if (!dataCol || mode === 'none') return () => true;
 
-                return function(row) {
-                    const dateObj = row['_dataObj'];
-                    if (!dateObj) return false;
-                    if (mode === 'single') {
+                if (mode === 'single') {
+                    return function(row) {
                         const input = document.getElementById('singleDate');
                         if (!input || !input.value) return true;
+                        const dateObj = row['_dataObj'];
+                        if (!dateObj) return false;
                         const filterDate = new Date(input.value + 'T00:00:00');
                         return dateObj.toDateString() === filterDate.toDateString();
-                    } else if (mode === 'range') {
+                    };
+                } else if (mode === 'range') {
+                    return function(row) {
                         const startInput = document.getElementById('startDate');
                         const endInput = document.getElementById('endDate');
+                        const dateObj = row['_dataObj'];
+                        if (!dateObj) return false;
                         const start = startInput && startInput.value ? new Date(startInput.value + 'T00:00:00') : null;
                         const end = endInput && endInput.value ? new Date(endInput.value + 'T23:59:59') : null;
                         if (start && dateObj < start) return false;
                         if (end && dateObj > end) return false;
                         return true;
-                    } else if (mode === 'month') {
+                    };
+                } else if (mode === 'month') {
+                    return function(row) {
                         const monthInput = document.getElementById('monthPicker');
                         if (!monthInput || !monthInput.value) return true;
                         const [year, month] = monthInput.value.split('-').map(Number);
+                        const dateObj = row['_dataObj'];
+                        if (!dateObj) return false;
                         return dateObj.getFullYear() === year && dateObj.getMonth() === (month - 1);
-                    }
-                    return true;
-                };
+                    };
+                }
+                return () => true;
             }
 
             function populateFilters() {
@@ -1327,7 +1444,6 @@
                     if (tipoCol) filteredData = filteredData.filter(r => r[tipoCol] === selectedTipo);
                 }
 
-                // Filtro por turno (baseado na coluna N LOJA)
                 if (selectedTurno !== 'Todos') {
                     filteredData = filteredData.filter(r => {
                         const nLoja = String(r['N LOJA'] || '').trim();
@@ -1338,7 +1454,6 @@
                     });
                 }
 
-                // Filtro inteligente de loja
                 if (smartSearchValue) {
                     const isNumeric = /^\d+$/.test(smartSearchValue);
                     if (isNumeric) {
@@ -1412,7 +1527,7 @@
             }
 
             function renderTable(containerId, columns, data, options = {}) {
-                const { sortable = true, highlightCol = null, highlightThreshold = null, highlightClass = 'highlight-red', colFormatters = [] } = options;
+                const { sortable = true, highlightCol = null, highlightThreshold = null, highlightClass = 'highlight-red', colFormatters = [], dblClickCol = null } = options;
                 const container = document.getElementById(containerId);
                 if (!container) return;
                 if (data.length === 0) {
@@ -1430,7 +1545,9 @@
                         const val = row[highlightCol];
                         if (typeof val === 'number' && val > highlightThreshold) highlight = true;
                     }
-                    html += `<tr class="${highlight ? highlightClass : ''}">`;
+                    const coluna = dblClickCol || null;
+                    const valor = coluna ? String(row[0] ?? '') : null;
+                    html += `<tr class="${highlight ? highlightClass : ''}" data-coluna="${coluna || ''}" data-valor="${valor || ''}">`;
                     row.forEach((cell, idx) => {
                         let display = cell;
                         if (colFormatters[idx]) {
@@ -1470,48 +1587,45 @@
                 }
             }
 
-            function renderBarChart(canvasId, labels, values, title, datalabelOverrides = {}) {
+            function renderBarChart(canvasId, labels, datasets, title, options = {}) {
                 const canvas = document.getElementById(canvasId);
                 if (!canvas) return;
                 if (charts[canvasId]) charts[canvasId].destroy();
                 const ctx = canvas.getContext('2d');
 
-                const defaultDatalabels = {
-                    rotation: 0,
-                    align: 'top',
+                const {
+                    datalabelFormatter = (value) => formatCurrency(value),
+                    tooltipLabelFormatter = (value) => formatCurrency(value)
+                } = options;
+
+                const finalDatalabels = {
                     anchor: 'end',
-                    offset: 4,
-                    formatter: (value) => formatCurrency(value),
-                    font: { weight: 'bold', size: 14 },
+                    align: 'top',
+                    formatter: (value) => datalabelFormatter(value),
+                    font: { weight: 'bold', size: 12 },
                     color: '#1e293b',
                 };
-                const finalDatalabels = { ...defaultDatalabels, ...datalabelOverrides };
 
                 charts[canvasId] = new Chart(ctx, {
                     type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Valor Total',
-                            data: values,
-                            backgroundColor: '#2563eb',
-                            borderRadius: 6,
-                            borderSkipped: false,
-                        }],
-                    },
+                    data: { labels, datasets },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        layout: { padding: { top: 20 } },
+                        layout: { padding: { top: 25 } },
                         plugins: {
-                            legend: { display: false },
+                            legend: { display: datasets.length > 1, position: 'bottom' },
                             title: { display: !!title, text: title, font: { size: 14 } },
-                            tooltip: { callbacks: { label: ctx => formatCurrency(ctx.parsed.y) } },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => `${ctx.dataset.label}: ${tooltipLabelFormatter(ctx.parsed.y)}`
+                                }
+                            },
                             datalabels: finalDatalabels,
                         },
                         scales: {
                             x: { ticks: { maxRotation: 45, font: { size: 10 } } },
-                            y: { beginAtZero: true, ticks: { callback: v => formatCurrency(v) } }
+                            y: { beginAtZero: true, ticks: { callback: v => tooltipLabelFormatter(v) } }
                         }
                     },
                 });
@@ -1524,6 +1638,8 @@
                 renderLoja();
                 renderItem();
                 renderChamados();
+                renderStatusValor();
+                renderAprovacao();
                 setTimeout(() => {
                     Object.values(charts).forEach(c => { if (c && c.resize) c.resize(); });
                 }, 200);
@@ -1552,7 +1668,7 @@
                 const start = (allPage - 1) * allPerPage;
                 const pageData = allFiltered.slice(start, start + allPerPage);
                 const rows = pageData.map(r => headers.map(c => r[c]));
-                renderTable('allTableWrapper', headers, rows, { sortable: true });
+                renderTable('allTableWrapper', headers, rows, { sortable: true, dblClickCol: getCol('caseTask') });
                 let pagHTML = '';
                 if (totalPages > 1) {
                     pagHTML += `<button ${allPage===1?'disabled':''} data-p="prev">◀</button>`;
@@ -1574,6 +1690,7 @@
                     else return;
                     renderAllTablePage();
                 };
+                setupTableDoubleClick('allTableWrapper', getCol('caseTask'));
             }
 
             function renderTipoDivergencia() {
@@ -1581,10 +1698,13 @@
                 const columns = ['Tipo de Divergência', 'Total Divergência', 'Qtd Ocorrências'];
                 const rows = agg.map(r => [r.key, r.total, r.count]);
                 const formatters = [null, formatCurrency, formatNumber];
-                renderTable('tipoTableWrapper', columns, rows, { sortable: true, colFormatters: formatters });
+                renderTable('tipoTableWrapper', columns, rows, { sortable: true, colFormatters: formatters, dblClickCol: getCol('tipoDivergencia') });
                 if (agg.length > 0) {
-                    renderBarChart('chartTipo', agg.map(r => r.key), agg.map(r => r.total), 'Valor por Tipo');
+                    renderBarChart('chartTipo', agg.map(r => r.key), [
+                        { label: 'Valor Total', data: agg.map(r => r.total), backgroundColor: '#2563eb', borderRadius: 6 }
+                    ], 'Valor por Tipo');
                 }
+                setupTableDoubleClick('tipoTableWrapper', getCol('tipoDivergencia'));
             }
 
             function renderLoja() {
@@ -1592,13 +1712,14 @@
                 const columns = ['Loja Destino', 'Total Divergência', 'Qtd Ocorrências'];
                 const rows = agg.map(r => [r.key, r.total, r.count]);
                 const formatters = [null, formatCurrency, formatNumber];
-                renderTable('lojaTableWrapper', columns, rows, { sortable: true, colFormatters: formatters });
+                renderTable('lojaTableWrapper', columns, rows, { sortable: true, colFormatters: formatters, dblClickCol: getCol('lojaDestino') });
                 if (agg.length > 0) {
                     const top = agg.slice(0, 10);
-                    renderBarChart('chartLoja', top.map(r => r.key), top.map(r => r.total), 'Top 10 Lojas', {
-                        formatter: (value) => formatK(value),
-                    });
+                    renderBarChart('chartLoja', top.map(r => r.key), [
+                        { label: 'Valor Total', data: top.map(r => r.total), backgroundColor: '#2563eb', borderRadius: 6 }
+                    ], 'Top 10 Lojas', { datalabelFormatter: (v) => formatK(v), tooltipLabelFormatter: (v) => formatK(v) });
                 }
+                setupTableDoubleClick('lojaTableWrapper', getCol('lojaDestino'));
             }
 
             function renderItem() {
@@ -1618,14 +1739,15 @@
                 const columns = ['Item (Descrição)', 'Total Divergência', 'Qtd Ocorrências'];
                 const rows = agg.map(r => [r.key, r.total, r.count]);
                 const formatters = [null, formatCurrency, formatNumber];
-                renderTable('itemTableWrapper', columns, rows, { sortable: true, colFormatters: formatters });
+                renderTable('itemTableWrapper', columns, rows, { sortable: true, colFormatters: formatters, dblClickCol: colDesc });
                 if (agg.length > 0) {
-                    const top = agg.slice(0, 20);
+                    const top = agg.slice(0, 10);
                     const shortLabels = top.map(r => r.key.length > 25 ? r.key.substring(0, 22) + '...' : r.key);
-                    renderBarChart('chartItem', shortLabels, top.map(r => r.total), 'Top 20 Itens', {
-                        formatter: (value) => formatK(value),
-                    });
+                    renderBarChart('chartItem', shortLabels, [
+                        { label: 'Valor Total', data: top.map(r => r.total), backgroundColor: '#2563eb', borderRadius: 6 }
+                    ], 'Top 10 Itens', { datalabelFormatter: (v) => formatK(v), tooltipLabelFormatter: (v) => formatK(v) });
                 }
+                setupTableDoubleClick('itemTableWrapper', colDesc);
             }
 
             function renderChamados() {
@@ -1681,7 +1803,8 @@
                     highlightCol: 5,
                     highlightThreshold: 5000,
                     highlightClass: 'highlight-red',
-                    colFormatters: formatters
+                    colFormatters: formatters,
+                    dblClickCol: getCol('caseTask')
                 });
 
                 let pagHTML = '';
@@ -1705,6 +1828,134 @@
                     else return;
                     renderChamadoPage();
                 };
+                setupTableDoubleClick('chamadoTableWrapper', getCol('caseTask'));
+            }
+
+            // Valor por Status (com percentual)
+            function renderStatusValor() {
+                const agg = aggregateByCol('status');
+                const totalGeral = agg.reduce((s, a) => s + a.total, 0);
+                const columns = ['Status', 'Total Divergência', '% do Total'];
+                const rows = agg.map(r => [r.key, r.total, totalGeral > 0 ? ((r.total / totalGeral) * 100).toFixed(1) + '%' : '0.0%']);
+                const formatters = [null, formatCurrency, null];
+                renderTable('statusTableWrapper', columns, rows, { sortable: true, colFormatters: formatters, dblClickCol: getCol('status') });
+                if (agg.length > 0) {
+                    renderBarChart('chartStatus', agg.map(r => r.key), [
+                        { label: 'Valor Total', data: agg.map(r => r.total), backgroundColor: '#2563eb', borderRadius: 6 }
+                    ], 'Valor Total por Status');
+                }
+                setupTableDoubleClick('statusTableWrapper', getCol('status'));
+            }
+
+            // Índice de Aprovação (com valor em R$ e percentual)
+            function renderAprovacao() {
+                const turnos = ['1º Turno', '2º Turno', '3º Turno'];
+                const colChamado = getCol('caseTask');
+                const colStatus = getCol('status');
+                const colVal = getCol('valorDivergencia');
+                
+                if (!colChamado || !colStatus || !colVal) {
+                    document.getElementById('aprovTableWrapper').innerHTML = '<div class="empty-state"><span class="empty-icon">📭</span><p>Colunas necessárias não encontradas.</p></div>';
+                    return;
+                }
+
+                const stats = turnos.map(turno => {
+                    const dadosTurno = filteredData.filter(r => {
+                        const nLoja = String(r['N LOJA'] || '').trim();
+                        if (!nLoja) return false;
+                        const lojaNum = parseInt(nLoja, 10);
+                        if (isNaN(lojaNum)) return false;
+                        return turnoPorLoja[lojaNum] === turno;
+                    });
+                    
+                    const chamadosUnicos = new Set(dadosTurno.map(r => String(r[colChamado] || '')).filter(Boolean));
+                    const totalChamados = chamadosUnicos.size;
+                    
+                    const autorizados = dadosTurno.filter(r => String(r[colStatus] || '').trim() === 'Autorizado');
+                    const chamadosAutorizadosUnicos = new Set(autorizados.map(r => String(r[colChamado] || '')).filter(Boolean));
+                    const autorizadosCount = chamadosAutorizadosUnicos.size;
+                    
+                    const valorTotal = dadosTurno.reduce((s, r) => s + (typeof r[colVal] === 'number' ? r[colVal] : 0), 0);
+                    const valorAutorizado = autorizados.reduce((s, r) => s + (typeof r[colVal] === 'number' ? r[colVal] : 0), 0);
+                    const percentValor = valorTotal > 0 ? (valorAutorizado / valorTotal * 100) : 0;
+                    
+                    return {
+                        turno,
+                        totalChamados,
+                        autorizadosCount,
+                        valorTotal,
+                        valorAutorizado,
+                        percentValor: Math.round(percentValor * 10) / 10
+                    };
+                });
+
+                const columns = ['Turno', 'Total Chamados', 'Chamados Autorizados', 'Valor Total (R$)', 'Valor Autorizado (R$)', '% Autorizado (Valor)'];
+                const rows = stats.map(s => [s.turno, s.totalChamados, s.autorizadosCount, s.valorTotal, s.valorAutorizado, s.percentValor.toFixed(1) + '%']);
+                const formatters = [null, formatNumber, formatNumber, formatCurrency, formatCurrency, null];
+                renderTable('aprovTableWrapper', columns, rows, { sortable: true, colFormatters: formatters, dblClickCol: 'turno_export' });
+
+                // Ajustar data-valor para o turno
+                const tbody = document.querySelector('#aprovTableWrapper tbody');
+                if (tbody) {
+                    const trs = tbody.querySelectorAll('tr');
+                    trs.forEach(tr => {
+                        tr.dataset.coluna = 'turno_export';
+                        const turno = tr.querySelector('td').textContent.trim();
+                        tr.dataset.valor = turno;
+                    });
+                }
+
+                if (stats.length > 0) {
+                    const labels = stats.map(s => s.turno);
+                    const datasets = [
+                        {
+                            label: 'Total de Chamados',
+                            data: stats.map(s => s.totalChamados),
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 6,
+                        },
+                        {
+                            label: 'Chamados Autorizados',
+                            data: stats.map(s => s.autorizadosCount),
+                            backgroundColor: '#dc2626',
+                            borderRadius: 6,
+                        }
+                    ];
+                    // Gráfico com números normais (sem R$)
+                    renderBarChart('chartAprovacao', labels, datasets, 'Índice de Aprovação por Turno', {
+                        datalabelFormatter: (v) => formatNumber(v),
+                        tooltipLabelFormatter: (v) => formatNumber(v)
+                    });
+                }
+
+                // Configurar duplo clique para exportar dados do turno
+                const container = document.getElementById('aprovTableWrapper');
+                if (container) {
+                    container.addEventListener('dblclick', function(e) {
+                        if (e.target.tagName === 'TH') {
+                            exportToCSV(filteredData, 'aprovacao_all.csv');
+                            toast(`📥 ${filteredData.length} registro(s) exportado(s)!`);
+                            return;
+                        }
+                        const tr = e.target.closest('tr');
+                        if (!tr) return;
+                        const turno = tr.dataset.valor;
+                        if (!turno) return;
+                        const dados = filteredData.filter(r => {
+                            const nLoja = String(r['N LOJA'] || '').trim();
+                            if (!nLoja) return false;
+                            const lojaNum = parseInt(nLoja, 10);
+                            if (isNaN(lojaNum)) return false;
+                            return turnoPorLoja[lojaNum] === turno;
+                        });
+                        if (dados.length > 0) {
+                            exportToCSV(dados, `aprovacao_${turno.replace(' ', '_')}.csv`);
+                            toast(`📥 ${dados.length} registro(s) exportado(s)!`);
+                        } else {
+                            toast('⚠️ Nenhum dado para exportar.', 'warning');
+                        }
+                    });
+                }
             }
 
             console.log('📦 HelpVision V1.0 pronto. Créditos: Pablo Martins Lopes.');
