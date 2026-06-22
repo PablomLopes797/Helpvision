@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HelpVision 🔍 V1.0</title>
+    <title>HelpVision 🔍 V1.1</title>
 
     <!-- Papa Parse -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -11,6 +11,22 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Chart.js DataLabels Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
+    <!-- Dados complementares (gerado pelo processador) -->
+    <script>
+        (function() {
+            const isGitHub = window.location.hostname.includes('github.io');
+            const script = document.createElement('script');
+            if (isGitHub) {
+                script.src = 'dados.js'; 
+                console.log('Ambiente GitHub Pages detectado. Carregando dados.js direto...');
+            } else {
+                script.src = 'dados.js';
+                console.log('Ambiente Local detectado.');
+            }
+            document.head.appendChild(script);
+        })();
+    </script>
 
     <style>
         :root {
@@ -68,11 +84,7 @@
             --btn-icon-bg: #1e293b;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
             background: var(--bg);
@@ -94,561 +106,132 @@
             z-index: 100;
             transition: background var(--transition);
         }
-        .app-header .title-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .app-header h1 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-            color: var(--text);
-            white-space: nowrap;
-        }
-        .app-header .credit {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
-        .badge {
-            font-size: 0.75rem;
-            background: #eef2ff;
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
+        .app-header .title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .app-header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.3px; color: var(--text); white-space: nowrap; }
+        .app-header .credit { font-size: 0.75rem; color: var(--text-secondary); font-weight: 400; }
+        .badge { font-size: 0.75rem; background: #eef2ff; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-weight: 600; white-space: nowrap; }
         .theme-toggle {
-            background: none;
-            border: 2px solid var(--border);
-            border-radius: 20px;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            color: var(--text);
-            background: var(--btn-icon-bg);
+            background: none; border: 2px solid var(--border); border-radius: 20px; padding: 6px 12px;
+            cursor: pointer; font-size: 1.1rem; transition: all var(--transition);
+            display: flex; align-items: center; gap: 4px; color: var(--text); background: var(--btn-icon-bg);
         }
-        .theme-toggle:hover {
-            background: var(--table-row-hover);
-            border-color: var(--primary);
-        }
-        .container {
-            max-width: 1500px;
-            margin: 0 auto;
-            padding: 20px 24px;
-        }
-        .card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            transition: background var(--transition);
-        }
-        .card-header {
-            font-weight: 700;
-            font-size: 1.05rem;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text);
-            justify-content: space-between;
-        }
-        .card-header .header-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .theme-toggle:hover { background: var(--table-row-hover); border-color: var(--primary); }
+        .container { max-width: 1500px; margin: 0 auto; padding: 20px 24px; }
+        .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: background var(--transition); }
+        .card-header { font-weight: 700; font-size: 1.05rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; color: var(--text); justify-content: space-between; }
+        .card-header .header-left { display: flex; align-items: center; gap: 8px; }
         .btn-icon {
-            background: none;
-            border: 2px solid var(--border);
-            border-radius: 20px;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            color: var(--text);
-            background: var(--btn-icon-bg);
+            background: none; border: 2px solid var(--border); border-radius: 20px; padding: 6px 12px;
+            cursor: pointer; font-size: 1rem; transition: all var(--transition);
+            display: flex; align-items: center; gap: 4px; color: var(--text); background: var(--btn-icon-bg);
         }
-        .btn-icon:hover {
-            background: var(--table-row-hover);
-            border-color: var(--primary);
-            color: var(--primary);
-        }
+        .btn-icon:hover { background: var(--table-row-hover); border-color: var(--primary); color: var(--primary); }
 
-        /* Dropzone */
-        .dropzone {
-            border: 3px dashed var(--border);
-            border-radius: var(--radius);
-            padding: 40px 24px;
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition);
-            background: var(--dropzone-bg);
-        }
-        .dropzone:hover,
-        .dropzone.drag-over {
-            border-color: var(--primary);
-            background: var(--table-row-hover);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
-        }
-        .dropzone .icon-upload {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 8px;
-        }
-        .dropzone p {
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 4px;
-        }
-        .dropzone span {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-        .dropzone input[type="file"] {
-            display: none;
-        }
-        .btn-select {
-            display: inline-block;
-            margin-top: 12px;
-            background: var(--primary);
-            color: #fff;
-            padding: 10px 22px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all var(--transition);
-            border: none;
-        }
-        .btn-select:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-        }
+        .dropzone { border: 3px dashed var(--border); border-radius: var(--radius); padding: 40px 24px; text-align: center; cursor: pointer; transition: all var(--transition); background: var(--dropzone-bg); }
+        .dropzone:hover, .dropzone.drag-over { border-color: var(--primary); background: var(--table-row-hover); transform: translateY(-2px); box-shadow: var(--shadow); }
+        .dropzone .icon-upload { font-size: 3rem; display: block; margin-bottom: 8px; }
+        .dropzone p { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+        .dropzone span { color: var(--text-secondary); font-size: 0.9rem; }
+        .dropzone input[type="file"] { display: none; }
+        .btn-select { display: inline-block; margin-top: 12px; background: var(--primary); color: #fff; padding: 10px 22px; border-radius: 25px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all var(--transition); border: none; }
+        .btn-select:hover { background: var(--primary-hover); transform: translateY(-1px); }
 
-        /* File info */
-        .file-info {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            align-items: center;
-            padding: 12px 18px;
-            background: var(--filter-bg);
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            margin-top: 16px;
-        }
-        .file-info .fi-item {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-        .file-info .fi-value {
-            font-weight: 700;
-            color: var(--text);
-            background: var(--card-bg);
-            padding: 3px 10px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-        .file-info .fi-name {
-            font-weight: 600;
-            color: var(--primary);
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+        .file-info { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 12px 18px; background: var(--filter-bg); border-radius: var(--radius-sm); border: 1px solid var(--border); margin-top: 16px; }
+        .file-info .fi-item { font-size: 0.9rem; color: var(--text-secondary); }
+        .file-info .fi-value { font-weight: 700; color: var(--text); background: var(--card-bg); padding: 3px 10px; border-radius: 12px; border: 1px solid var(--border); }
+        .file-info .fi-name { font-weight: 600; color: var(--primary); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        /* Filtros */
-        .filter-bar {
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            flex-wrap: wrap;
-            padding: 12px 20px;
-            background: var(--filter-bg);
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            margin-bottom: 16px;
+        .filter-bar { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; padding: 12px 20px; background: var(--filter-bg); border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 16px; }
+        .filter-group { display: flex; align-items: center; gap: 8px; }
+        .filter-group label { font-weight: 700; font-size: 0.85rem; color: var(--text); white-space: nowrap; }
+        .filter-group select, .filter-group input { padding: 8px 14px; border: 2px solid var(--border); border-radius: 20px; font-size: 0.85rem; background: var(--card-bg); color: var(--text); cursor: pointer; font-weight: 500; transition: all var(--transition); min-width: 150px; }
+        
+        /* Estilo para multiselect simulado */
+        .multiselect-container { position: relative; min-width: 180px; }
+        .multiselect-selected { 
+            padding: 8px 14px; border: 2px solid var(--border); border-radius: 20px; 
+            font-size: 0.85rem; background: var(--card-bg); color: var(--text); 
+            cursor: pointer; font-weight: 500; display: flex; justify-content: space-between; align-items: center;
         }
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .multiselect-options { 
+            position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); 
+            border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow); 
+            z-index: 200; max-height: 250px; overflow-y: auto; display: none; padding: 8px 0;
         }
-        .filter-group label {
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: var(--text);
-            white-space: nowrap;
+        .multiselect-option { 
+            padding: 6px 14px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;
         }
-        .filter-group select,
-        .filter-group input {
-            padding: 8px 14px;
-            border: 2px solid var(--border);
-            border-radius: 20px;
-            font-size: 0.85rem;
-            background: var(--card-bg);
-            color: var(--text);
-            cursor: pointer;
-            font-weight: 500;
-            transition: all var(--transition);
-            min-width: 150px;
-        }
-        .filter-group input[type="date"] {
-            cursor: text;
-        }
-        .filter-group select:focus,
-        .filter-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
+        .multiselect-option:hover { background: var(--table-row-hover); }
+        .multiselect-option input { min-width: auto; cursor: pointer; }
+        .multiselect-container.active .multiselect-options { display: block; }
+        .multiselect-footer { display: flex; gap: 8px; padding: 8px 14px; border-top: 1px solid var(--border); background: var(--filter-bg); }
+        .btn-mini { padding: 4px 10px; border-radius: 12px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all var(--transition); }
+        .btn-apply { background: var(--primary); color: #fff; }
+        .btn-clear { background: var(--border); color: var(--text); }
 
-        /* Barra de pesquisa inteligente */
-        .search-intelligent {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .search-intelligent input {
-            padding: 8px 14px;
-            border: 2px solid var(--border);
-            border-radius: 20px;
-            font-size: 0.85rem;
-            background: var(--card-bg);
-            color: var(--text);
-            font-weight: 500;
-            transition: all var(--transition);
-            width: 280px;
-        }
-        .search-intelligent input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        .suggestions-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            z-index: 200;
-            max-height: 200px;
-            overflow-y: auto;
-            display: none;
-        }
-        .suggestions-dropdown .suggestion-item {
-            padding: 8px 14px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            border-bottom: 1px solid var(--border);
-            color: var(--text);
-        }
-        .suggestions-dropdown .suggestion-item:hover {
-            background: var(--table-row-hover);
-        }
+        .filter-group input[type="date"] { cursor: text; }
+        .filter-group select:focus, .filter-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-            border-bottom: 2px solid var(--border);
-            margin-bottom: 16px;
-            overflow-x: auto;
-        }
-        .tab-btn {
-            padding: 10px 18px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
-            transition: all var(--transition);
-            border-radius: 8px 8px 0 0;
-            white-space: nowrap;
-        }
-        .tab-btn:hover {
-            color: var(--text);
-            background: var(--filter-bg);
-        }
-        .tab-btn.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-            background: var(--table-row-hover);
-        }
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.25s ease;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        .search-intelligent { position: relative; display: flex; align-items: center; gap: 8px; }
+        .search-intelligent input { padding: 8px 14px; border: 2px solid var(--border); border-radius: 20px; font-size: 0.85rem; background: var(--card-bg); color: var(--text); font-weight: 500; transition: all var(--transition); width: 280px; }
+        .search-intelligent input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .suggestions-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow); z-index: 200; max-height: 200px; overflow-y: auto; display: none; }
+        .suggestions-dropdown .suggestion-item { padding: 8px 14px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid var(--border); color: var(--text); }
+        .suggestions-dropdown .suggestion-item:hover { background: var(--table-row-hover); }
 
-        /* Tabelas */
-        .table-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 9px 14px;
-            border: 2px solid var(--border);
-            border-radius: 20px;
-            font-size: 0.85rem;
-            transition: all var(--transition);
-            background: var(--search-bg);
-            color: var(--text);
-        }
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-            background: var(--card-bg);
-        }
-        .table-wrapper {
-            overflow-x: auto;
-            overflow-y: auto;
-            max-height: 60vh;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.82rem;
-            white-space: nowrap;
-        }
-        thead {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        thead th {
-            background: var(--table-header-bg);
-            color: var(--text);
-            font-weight: 700;
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 2px solid var(--border);
-            cursor: pointer;
-            user-select: none;
-            transition: background var(--transition);
-        }
-        thead th:hover {
-            background: var(--border);
-        }
-        thead th .sort-icon {
-            margin-left: 4px;
-            font-size: 0.7rem;
-            opacity: 0.5;
-        }
-        thead th.sorted .sort-icon {
-            opacity: 1;
-            color: var(--primary);
-        }
-        tbody td {
-            padding: 8px 12px;
-            border-bottom: 1px solid var(--border);
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: var(--text);
-        }
-        tbody tr {
-            cursor: pointer;
-        }
-        tbody tr:nth-child(even) {
-            background: var(--table-row-even);
-        }
-        tbody tr:hover {
-            background: var(--table-row-hover);
-        }
-        .pagination {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            align-items: center;
-            justify-content: center;
-            margin-top: 14px;
-            font-size: 0.85rem;
-        }
-        .pagination button {
-            padding: 7px 12px;
-            border: 1px solid var(--border);
-            background: var(--pagination-btn-bg);
-            color: var(--text);
-            border-radius: 16px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all var(--transition);
-            font-size: 0.8rem;
-        }
-        .pagination button:hover:not(:disabled) {
-            background: var(--table-row-hover);
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        .pagination button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        .pagination button.active-page {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary);
-        }
+        .tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 2px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
+        .tab-btn { padding: 10px 18px; background: none; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; color: var(--text-secondary); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all var(--transition); border-radius: 8px 8px 0 0; white-space: nowrap; }
+        .tab-btn:hover { color: var(--text); background: var(--filter-bg); }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--table-row-hover); }
+        .tab-content { display: none; animation: fadeIn 0.25s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Gráficos */
-        .chart-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 16px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: 350px;
-        }
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        @media (max-width: 900px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        .table-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
+        .search-input { flex: 1; min-width: 200px; padding: 9px 14px; border: 2px solid var(--border); border-radius: 20px; font-size: 0.85rem; transition: all var(--transition); background: var(--search-bg); color: var(--text); }
+        .search-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); background: var(--card-bg); }
+        .table-wrapper { overflow-x: auto; overflow-y: auto; max-height: 60vh; border-radius: var(--radius-sm); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; white-space: nowrap; }
+        thead { position: sticky; top: 0; z-index: 10; }
+        thead th { background: var(--table-header-bg); color: var(--text); font-weight: 700; padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--border); cursor: pointer; user-select: none; transition: background var(--transition); }
+        thead th:hover { background: var(--border); }
+        thead th .sort-icon { margin-left: 4px; font-size: 0.7rem; opacity: 0.5; }
+        thead th.sorted .sort-icon { opacity: 1; color: var(--primary); }
+        tbody td { padding: 8px 12px; border-bottom: 1px solid var(--border); max-width: 300px; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+        tbody tr { cursor: pointer; }
+        tbody tr:nth-child(even) { background: var(--table-row-even); }
+        tbody tr:hover { background: var(--table-row-hover); }
+        .pagination { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; margin-top: 14px; font-size: 0.85rem; }
+        .pagination button { padding: 7px 12px; border: 1px solid var(--border); background: var(--pagination-btn-bg); color: var(--text); border-radius: 16px; cursor: pointer; font-weight: 600; transition: all var(--transition); font-size: 0.8rem; }
+        .pagination button:hover:not(:disabled) { background: var(--table-row-hover); border-color: var(--primary); color: var(--primary); }
+        .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .pagination button.active-page { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-        /* Indicadores */
-        .highlight-red {
-            background-color: #fee2e2 !important;
-            font-weight: 700;
-        }
-        body.dark .highlight-red {
-            background-color: #450a0a !important;
-        }
+        .chart-card { background: var(--card-bg); border-radius: var(--radius); padding: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+        .chart-container { position: relative; width: 100%; height: 350px; }
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        .colaborador-chart-container { height: 520px; }
+        @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
 
-        /* KPI Cards */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        .kpi-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 16px 20px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .kpi-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-        }
-        .kpi-value {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: var(--text);
-        }
-        .kpi-value.danger {
-            color: var(--danger);
-        }
+        .highlight-red { background-color: #fee2e2 !important; font-weight: 700; }
+        body.dark .highlight-red { background-color: #450a0a !important; }
 
-        /* Toast */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.85rem;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            animation: slideIn 0.35s ease;
-            max-width: 400px;
-        }
-        .toast.error {
-            background: var(--danger);
-        }
-        .toast.success {
-            background: var(--success);
-        }
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(60px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .kpi-card { background: var(--card-bg); border-radius: var(--radius); padding: 16px 20px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 4px; }
+        .kpi-label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; }
+        .kpi-value { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+        .kpi-value.danger { color: var(--danger); }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
-        }
-        .empty-state .empty-icon {
-            font-size: 3.5rem;
-            display: block;
-            margin-bottom: 10px;
-            opacity: 0.6;
-        }
+        .toast { position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 12px 20px; border-radius: 8px; color: #fff; font-weight: 600; font-size: 0.85rem; box-shadow: 0 8px 20px rgba(0,0,0,0.2); animation: slideIn 0.35s ease; max-width: 400px; }
+        .toast.error { background: var(--danger); }
+        .toast.success { background: var(--success); }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
+
+        .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
+        .empty-state .empty-icon { font-size: 3.5rem; display: block; margin-bottom: 10px; opacity: 0.6; }
     </style>
 </head>
 <body>
-
     <header class="app-header">
         <div class="title-row">
             <span style="font-size:1.5rem;">📦</span>
@@ -660,7 +243,6 @@
     </header>
 
     <div class="container">
-        <!-- Upload -->
         <div class="card" id="uploadCard">
             <div class="dropzone" id="dropzone">
                 <span class="icon-upload">📁</span>
@@ -674,38 +256,45 @@
                 <span class="fi-item">📄 <span class="fi-name" id="fileName">—</span></span>
                 <span class="fi-item">📋 Colunas: <span class="fi-value" id="colCount">0</span></span>
                 <span class="fi-item">📝 Linhas: <span class="fi-value" id="rowCount">0</span></span>
-                <span class="fi-item">💰 Total Divergências: <span class="fi-value" id="totalDiv">R$ 0</span></span>
+                <span class="fi-item">💰 Total: <span class="fi-value" id="totalDiv">R$ 0,00</span></span>
             </div>
         </div>
 
-        <!-- Conteúdo principal -->
         <div id="mainContent" style="display:none;">
-
-            <!-- KPIs rápidos -->
             <div class="kpi-grid" id="kpiGrid"></div>
 
-            <!-- Filtros de Segmentação -->
             <div class="filter-bar">
                 <div class="filter-group">
-                    <label for="statusFilter">🔽 Status:</label>
-                    <select id="statusFilter">
-                        <option value="Todos">📌 Todos</option>
-                    </select>
+                    <label>🔽 Status:</label>
+                    <div class="multiselect-container" id="statusFilterContainer">
+                        <div class="multiselect-selected"><span>Selecionar...</span> ▾</div>
+                        <div class="multiselect-options" id="statusOptions"></div>
+                    </div>
                 </div>
                 <div class="filter-group">
-                    <label for="tipoFilter">📌 Tipo Divergência:</label>
-                    <select id="tipoFilter">
-                        <option value="Todos">📌 Todos</option>
-                    </select>
+                    <label>📌 Tipo Divergência:</label>
+                    <div class="multiselect-container" id="tipoFilterContainer">
+                        <div class="multiselect-selected"><span>Selecionar...</span> ▾</div>
+                        <div class="multiselect-options" id="tipoOptions"></div>
+                    </div>
                 </div>
                 <div class="filter-group">
-                    <label for="turnoFilter">🕒 Turno:</label>
-                    <select id="turnoFilter">
-                        <option value="Todos">📌 Todos</option>
-                        <option value="1º Turno">1º Turno</option>
-                        <option value="2º Turno">2º Turno</option>
-                        <option value="3º Turno">3º Turno</option>
-                    </select>
+                    <label>🕒 Turno:</label>
+                    <div class="multiselect-container" id="turnoFilterContainer">
+                        <div class="multiselect-selected"><span>Selecionar...</span> ▾</div>
+                        <div class="multiselect-options" id="turnoOptions">
+                            <div class="multiselect-option"><input type="checkbox" value="1º Turno"> 1º Turno</div>
+                            <div class="multiselect-option"><input type="checkbox" value="2º Turno"> 2º Turno</div>
+                            <div class="multiselect-option"><input type="checkbox" value="3º Turno"> 3º Turno</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>🕒 TURNO_PRODUZIDO:</label>
+                    <div class="multiselect-container" id="turnoProduzidoFilterContainer">
+                        <div class="multiselect-selected"><span>Selecionar...</span> ▾</div>
+                        <div class="multiselect-options" id="turnoProduzidoOptions"></div>
+                    </div>
                 </div>
                 <div class="filter-group" style="flex-wrap: wrap;">
                     <label for="dateMode">📅 Data:</label>
@@ -724,7 +313,6 @@
                 </div>
             </div>
 
-            <!-- Tabs -->
             <div class="tabs" id="tabNav">
                 <button class="tab-btn active" data-tab="tab-dados">📋 Dados Brutos</button>
                 <button class="tab-btn" data-tab="tab-tipo">📌 Por Tipo de Divergência</button>
@@ -733,14 +321,14 @@
                 <button class="tab-btn" data-tab="tab-chamado">🎫 Por Chamado</button>
                 <button class="tab-btn" data-tab="tab-status-valor">💰 Valor por Status</button>
                 <button class="tab-btn" data-tab="tab-aprovacao">📈 Índice de Aprovação</button>
+                <button class="tab-btn" data-tab="tab-colaboradores">👤 Colaboradores Ofensores</button>
             </div>
 
-            <!-- Abas -->
             <div class="tab-content active" id="tab-dados">
                 <div class="card">
                     <div class="card-header">
                         <div class="header-left">📋 Tabela de Dados Brutos</div>
-                        <button class="btn-icon" onclick="copyTable('allTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                        <button class="btn-icon" onclick="copyTable('allTableWrapper')">📋 Copiar</button>
                     </div>
                     <div class="table-controls">
                         <input type="text" class="search-input" id="searchAll" placeholder="🔍 Filtrar em todas as colunas...">
@@ -754,14 +342,14 @@
                     <div class="chart-card">
                         <div class="card-header">
                             <div class="header-left">📊 Valor Total por Tipo de Divergência</div>
-                            <button class="btn-icon" id="btnCameraTipo" title="Salvar gráfico como imagem">📷 Salvar</button>
+                            <button class="btn-icon" id="btnCameraTipo">📷 Salvar</button>
                         </div>
                         <div class="chart-container"><canvas id="chartTipo"></canvas></div>
                     </div>
                     <div class="chart-card">
                         <div class="card-header">
                             <div class="header-left">📋 Tabela por Tipo de Divergência</div>
-                            <button class="btn-icon" onclick="copyTable('tipoTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                            <button class="btn-icon" onclick="copyTable('tipoTableWrapper')">📋 Copiar</button>
                         </div>
                         <div class="table-wrapper" id="tipoTableWrapper"></div>
                     </div>
@@ -772,14 +360,14 @@
                     <div class="chart-card">
                         <div class="card-header">
                             <div class="header-left">🏪 Top 10 Lojas por Valor de Divergência</div>
-                            <button class="btn-icon" id="btnCameraLoja" title="Salvar gráfico como imagem">📷 Salvar</button>
+                            <button class="btn-icon" id="btnCameraLoja">📷 Salvar</button>
                         </div>
                         <div class="chart-container"><canvas id="chartLoja"></canvas></div>
                     </div>
                     <div class="chart-card">
                         <div class="card-header">
                             <div class="header-left">📋 Tabela por Loja</div>
-                            <button class="btn-icon" onclick="copyTable('lojaTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                            <button class="btn-icon" onclick="copyTable('lojaTableWrapper')">📋 Copiar</button>
                         </div>
                         <div class="table-wrapper" id="lojaTableWrapper"></div>
                     </div>
@@ -790,14 +378,14 @@
                     <div class="chart-card">
                         <div class="card-header">
                             <div class="header-left">🛒 Top 10 Itens por Valor de Divergência</div>
-                            <button class="btn-icon" id="btnCameraItem" title="Salvar gráfico como imagem">📷 Salvar</button>
+                            <button class="btn-icon" id="btnCameraItem">📷 Salvar</button>
                         </div>
                         <div class="chart-container"><canvas id="chartItem"></canvas></div>
                     </div>
                     <div class="chart-card">
                         <div class="card-header">
                             <div class="header-left">📋 Tabela por Item</div>
-                            <button class="btn-icon" onclick="copyTable('itemTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                            <button class="btn-icon" onclick="copyTable('itemTableWrapper')">📋 Copiar</button>
                         </div>
                         <div class="table-wrapper" id="itemTableWrapper"></div>
                     </div>
@@ -807,53 +395,88 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="header-left">🎫 Chamados com Valor de Divergência (🔴 > R$ 5.000)</div>
-                        <button class="btn-icon" onclick="copyTable('chamadoTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                        <button class="btn-icon" onclick="copyTable('chamadoTableWrapper')">📋 Copiar</button>
                     </div>
                     <div class="table-wrapper" id="chamadoTableWrapper"></div>
                     <div class="pagination" id="chamadoPagination"></div>
                 </div>
             </div>
-            <!-- Aba: Valor por Status -->
             <div class="tab-content" id="tab-status-valor">
                 <div class="charts-grid">
                     <div class="chart-card">
                         <div class="card-header">
-                            <div class="header-left">💰 Valor Total por Status</div>
-                            <button class="btn-icon" id="btnCameraStatus" title="Salvar gráfico como imagem">📷 Salvar</button>
+                            <div class="header-left">📊 Valor Total por Status</div>
+                            <button class="btn-icon" id="btnCameraStatus">📷 Salvar</button>
                         </div>
                         <div class="chart-container"><canvas id="chartStatus"></canvas></div>
                     </div>
                     <div class="chart-card">
                         <div class="card-header">
                             <div class="header-left">📋 Tabela por Status</div>
-                            <button class="btn-icon" onclick="copyTable('statusTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                            <button class="btn-icon" onclick="copyTable('statusTableWrapper')">📋 Copiar</button>
                         </div>
                         <div class="table-wrapper" id="statusTableWrapper"></div>
                     </div>
                 </div>
             </div>
-            <!-- Aba: Índice de Aprovação -->
             <div class="tab-content" id="tab-aprovacao">
                 <div class="charts-grid">
                     <div class="chart-card">
                         <div class="card-header">
-                            <div class="header-left">📈 Chamados por Turno (Total vs Autorizados)</div>
-                            <button class="btn-icon" id="btnCameraAprovacao" title="Salvar gráfico como imagem">📷 Salvar</button>
+                            <div class="header-left">📈 Índice de Aprovação por Turno</div>
+                            <button class="btn-icon" id="btnCameraAprovacao">📷 Salvar</button>
                         </div>
                         <div class="chart-container"><canvas id="chartAprovacao"></canvas></div>
                     </div>
                     <div class="chart-card">
                         <div class="card-header">
-                            <div class="header-left">📋 Tabela de Aprovação por Turno</div>
-                            <button class="btn-icon" onclick="copyTable('aprovTableWrapper')" title="Copiar tabela">📋 Copiar</button>
+                            <div class="header-left">📋 Tabela de Aprovação</div>
+                            <button class="btn-icon" onclick="copyTable('aprovTableWrapper')">📋 Copiar</button>
                         </div>
                         <div class="table-wrapper" id="aprovTableWrapper"></div>
                     </div>
                 </div>
             </div>
+            <div class="tab-content" id="tab-colaboradores">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="header-left">🔍 Filtrar Colaboradores Ofensores</div>
+                    </div>
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label for="pltFechadoFilter">📦 PLTFECHADO:</label>
+                            <select id="pltFechadoFilter">
+                                <option value="Todos">📌 Todos</option>
+                                <option value="S">Sim (S)</option>
+                                <option value="N">Não (N)</option>
+                            </select>
+                        </div>
+                        <div class="search-intelligent">
+                            <label style="font-weight: 700; font-size: 0.85rem;">👤 Buscar Colaborador:</label>
+                            <input type="text" id="colaboradorSearch" placeholder="Matrícula ou Nome..." autocomplete="off">
+                            <div class="suggestions-dropdown" id="colaboradorSuggestions"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <div class="header-left">👤 Top 10 Produtivos Ofensores por R$</div>
+                            <button class="btn-icon" id="btnCameraColaboradores">📷 Salvar</button>
+                        </div>
+                        <div class="chart-container colaborador-chart-container"><canvas id="chartColaboradores"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <div class="header-left">📋 Tabela de Colaboradores Ofensores</div>
+                            <button class="btn-icon" onclick="copyTable('colaboradoresTableWrapper')">📋 Copiar</button>
+                        </div>
+                        <div class="table-wrapper" id="colaboradoresTableWrapper"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Estado vazio -->
         <div id="noDataMessage" class="card">
             <div class="empty-state">
                 <span class="empty-icon">📂</span>
@@ -867,7 +490,6 @@
         (function() {
             Chart.register(ChartDataLabels);
 
-            // Estado global
             let allData = [];
             let headers = [];
             let filteredData = [];
@@ -881,10 +503,9 @@
             let allFiltered = [];
             let chamadoPage = 1;
             const chamadoPerPage = 30;
-
             let smartSearchValue = '';
+            let colaboradorSearchValue = '';
 
-            // Mapeamento de turnos por número de loja (N LOJA)
             const turnoPorLoja = {
                 25: '3º Turno', 178: '3º Turno', 312: '3º Turno', 269: '3º Turno', 285: '3º Turno',
                 274: '3º Turno', 8: '3º Turno', 263: '3º Turno', 93: '3º Turno', 149: '3º Turno',
@@ -913,13 +534,13 @@
                 237: '2º Turno'
             };
 
-            // Modo escuro
             const themeToggle = document.getElementById('themeToggle');
             themeToggle.addEventListener('click', () => {
                 document.body.classList.toggle('dark');
                 const isDark = document.body.classList.contains('dark');
                 themeToggle.textContent = isDark ? '☀️' : '🌙';
                 localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                if (allData.length) renderAll();
             });
             if (localStorage.getItem('theme') === 'dark') {
                 document.body.classList.add('dark');
@@ -941,13 +562,9 @@
                 if (typeof str === 'number') return str;
                 if (!str || typeof str !== 'string') return NaN;
                 let s = str.trim();
-                if (s.includes(',') && s.includes('.')) {
-                    s = s.replace(/\./g, '').replace(',', '.');
-                } else if (s.includes(',') && !s.includes('.')) {
-                    s = s.replace(',', '.');
-                }
-                const num = parseFloat(s);
-                return isNaN(num) ? NaN : num;
+                if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.');
+                else if (s.includes(',') && !s.includes('.')) s = s.replace(',', '.');
+                return parseFloat(s);
             }
 
             function parseDate(str) {
@@ -959,61 +576,47 @@
                     const month = parseInt(parts[1], 10) - 1;
                     let year = parseInt(parts[2], 10);
                     if (year < 100) year += 2000;
-                    if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-                        return new Date(year, month, day);
-                    }
+                    if (!isNaN(day) && !isNaN(month) && !isNaN(year)) return new Date(year, month, day);
                 }
                 const d = new Date(str);
                 return isNaN(d.getTime()) ? null : d;
             }
 
             function nomeMesExtenso(date) {
-                const meses = [
-                    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-                    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
-                ];
+                const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
                 return meses[date.getMonth()];
             }
 
             function gerarKeyMes(date) {
                 if (!date || isNaN(date.getTime())) return '';
-                const mes = nomeMesExtenso(date);
-                const ano = date.getFullYear();
-                return `${mes} de ${ano}`;
+                return `${nomeMesExtenso(date)} de ${date.getFullYear()}`;
             }
 
             function extrairNLoja(lojaDestino) {
                 if (!lojaDestino) return '';
                 const str = String(lojaDestino);
                 const idx = str.indexOf('- ');
-                if (idx !== -1) {
-                    return str.substring(idx + 2).trim();
-                }
-                return '';
+                return idx !== -1 ? str.substring(idx + 2).trim() : '';
             }
 
-            // Exportar dados filtrados como CSV (separador ponto e vírgula)
             function exportToCSV(dataArray, filename = 'exportacao.csv') {
                 const csv = Papa.unparse(dataArray, { delimiter: ";", header: true });
                 const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-                link.href = url;
+                link.href = URL.createObjectURL(blob);
                 link.download = filename;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                URL.revokeObjectURL(url);
+                URL.revokeObjectURL(link.href);
             }
 
-            // Duplo clique inteligente
-            function setupTableDoubleClick(containerId, colunaChave, exportAll = false) {
+            function setupTableDoubleClick(containerId, colunaChave) {
                 const container = document.getElementById(containerId);
                 if (!container) return;
                 container.addEventListener('dblclick', function(e) {
                     const target = e.target;
                     if (target.tagName === 'TH') {
-                        // Cabeçalho: exporta tudo
                         exportToCSV(filteredData, `${containerId}_all.csv`);
                         toast(`📥 ${filteredData.length} registro(s) exportado(s)!`);
                         return;
@@ -1022,12 +625,7 @@
                     if (!tr) return;
                     const valor = tr.dataset.valor;
                     if (!valor) return;
-                    let dados;
-                    if (exportAll) {
-                        dados = filteredData.filter(r => String(r[colunaChave] || '') === valor);
-                    } else {
-                        dados = filteredData.filter(r => String(r[colunaChave] || '') === valor);
-                    }
+                    const dados = filteredData.filter(r => String(r[colunaChave] || '') === valor);
                     if (dados.length > 0) {
                         exportToCSV(dados, `${colunaChave}_${valor}.csv`);
                         toast(`📥 ${dados.length} registro(s) exportado(s)!`);
@@ -1072,63 +670,81 @@
 
                         headers.push('N LOJA');
                         headers.push('KEY MÊS');
-                        
+                        headers.push('KEY_CARGA_LOTE');
+
                         mapColumns();
                         const statusCol = getCol('status');
                         const tipoCol = getCol('tipoDivergencia');
                         const valorCol = getCol('valorDivergencia');
                         const dataCol = getCol('abertoEm');
                         const lojaCol = getCol('lojaDestino');
+                        const numCargaCol = getCol('numeroCarga');
+                        const loteCol = getCol('lote');
 
                         allData.forEach(row => {
-                            if (lojaCol) {
-                                row['N LOJA'] = extrairNLoja(row[lojaCol]);
-                            } else {
-                                row['N LOJA'] = '';
-                            }
-
+                            if (lojaCol) row['N LOJA'] = extrairNLoja(row[lojaCol]); else row['N LOJA'] = '';
                             if (dataCol) {
                                 const d = parseDate(row[dataCol]);
                                 row['_dataObj'] = d;
                                 row['KEY MÊS'] = d ? gerarKeyMes(d) : '';
-                            } else {
-                                row['_dataObj'] = null;
-                                row['KEY MÊS'] = '';
-                            }
-
+                            } else { row['_dataObj'] = null; row['KEY MÊS'] = ''; }
+                            if (numCargaCol && loteCol) {
+                                row['KEY_CARGA_LOTE'] = String(row[numCargaCol] || '').trim() + '_' + String(row[loteCol] || '').trim();
+                            } else { row['KEY_CARGA_LOTE'] = ''; }
                             if (statusCol) {
                                 let val = row[statusCol];
-                                if (val === null || val === undefined || String(val).trim() === '') {
-                                    row[statusCol] = 'Em Aberto';
-                                } else {
-                                    row[statusCol] = String(val).trim();
-                                }
+                                row[statusCol] = (!val || String(val).trim() === '') ? 'Em Aberto' : String(val).trim();
                             }
                             if (tipoCol) {
                                 let val = row[tipoCol];
-                                if (val === null || val === undefined || String(val).trim() === '') {
-                                    row[tipoCol] = 'Não informado';
-                                } else {
-                                    row[tipoCol] = String(val).trim();
-                                }
+                                row[tipoCol] = (!val || String(val).trim() === '') ? 'Não informado' : String(val).trim();
                             }
                             if (valorCol && row[valorCol] !== null && row[valorCol] !== undefined) {
                                 const converted = parseBrazilianNumber(String(row[valorCol]));
-                                row[valorCol] = !isNaN(converted) ? converted : 0;
+                                row[valorCol] = isNaN(converted) ? 0 : converted;
                             }
                         });
 
+                        const novasColunas = [
+                            'DTAHORINITAREFA', 'HR INI', 'DTAHORFIMTAREFA', 'HR FIM',
+                            'DTAHORFATURAMENTO', 'HR FAT', 'STATUS_TXT', 'NROCARGA',
+                            'SEQLOTE', 'PLTFECHADO', 'CODPRODUTIVO', 'PRODUTIVO',
+                            'TURNO_INI', 'TURNO_FIM', 'TURNO_FAT'
+                        ];
+                        headers.push(...novasColunas);
+
+                        let matchCount = 0;
+                        if (typeof DADOS_TXTS !== 'undefined' && DADOS_TXTS.length > 0) {
+                            const mapaTxt = new Map();
+                            DADOS_TXTS.forEach(txtRow => {
+                                const chave = String(txtRow['KEY_CARGA_LOTE'] || '').trim();
+                                if (chave) mapaTxt.set(chave, txtRow);
+                            });
+                            allData.forEach(row => {
+                                const chave = String(row['KEY_CARGA_LOTE'] || '').trim();
+                                const match = mapaTxt.get(chave);
+                                if (match) {
+                                    novasColunas.forEach(col => {
+                                        const campoOrigem = col === 'STATUS_TXT' ? 'STATUS' : col;
+                                        row[col] = match[campoOrigem] !== undefined ? match[campoOrigem] : '';
+                                    });
+                                    matchCount++;
+                                } else {
+                                    novasColunas.forEach(col => { row[col] = ''; });
+                                }
+                            });
+                            toast(`✅ ${matchCount} registros complementares carregados.`);
+                        }
+
                         const statusSet = new Set();
                         const tipoSet = new Set();
-                        allData.forEach(r => {
-                            if (statusCol) statusSet.add(r[statusCol]);
-                            if (tipoCol) tipoSet.add(r[tipoCol]);
-                        });
+                        allData.forEach(r => { if (statusCol) statusSet.add(r[statusCol]); if (tipoCol) tipoSet.add(r[tipoCol]); });
                         statusValues = Array.from(statusSet).sort();
                         tipoValues = Array.from(tipoSet).sort();
                         populateFilters();
                         populateDateMode();
                         setupSmartSearch();
+                        setupColaboradorSearch();
 
                         document.getElementById('fileName').textContent = file.name;
                         document.getElementById('colCount').textContent = headers.length;
@@ -1141,9 +757,9 @@
                         resetTabs();
                         applyAllFilters();
                         renderAll();
-                        toast('✅ Carregado! Total: ' + formatCurrency(totalDiv), 'success');
+                        toast('✅ Carregado!', 'success');
                     },
-                    error: () => toast('Erro ao ler o arquivo.', 'error'),
+                    error: () => toast('Erro ao ler o arquivo.', 'error')
                 });
             }
 
@@ -1160,225 +776,215 @@
                     ['lote', ['Lote', 'lote', 'LOTE']],
                     ['valorDivergencia', ['Custo total do item (UN)', 'custo total do item', 'Custo total', 'Valor divergência', 'valor divergencia', 'Valor', 'Custo']],
                     ['status', ['Status', 'status', 'STATUS', 'Estado', 'estado']],
-                    ['quantidadeNF', ['Quantidade da Nota Fiscal', 'quantidade nota fiscal', 'Quantidade NF']],
+                    ['quantidadeNF', ['Quantidade da Nota Fiscal', 'quantidade nota fiscal', 'Quantidade NF']]
                 ];
-
                 for (let [key, possibleNames] of mappings) {
                     for (let name of possibleNames) {
                         const found = headers.find(h => h.trim().toLowerCase() === name.toLowerCase());
-                        if (found) {
-                            idx[key] = headers.indexOf(found);
-                            break;
-                        }
+                        if (found) { idx[key] = headers.indexOf(found); break; }
                     }
                     if (idx[key] === undefined) {
                         for (let name of possibleNames) {
                             const found = headers.find(h => h.toLowerCase().includes(name.toLowerCase()));
-                            if (found) {
-                                idx[key] = headers.indexOf(found);
-                                break;
-                            }
+                            if (found) { idx[key] = headers.indexOf(found); break; }
                         }
                     }
                 }
-
-                if (idx.tipoDivergencia === undefined && headers.length > 15) idx.tipoDivergencia = 15;
-                if (idx.valorDivergencia === undefined && headers.length > 32) idx.valorDivergencia = 32;
-                if (idx.codigoProduto === undefined && headers.length > 22) idx.codigoProduto = 22;
-                if (idx.lojaDestino === undefined && headers.length > 21) idx.lojaDestino = 21;
-                if (idx.caseTask === undefined && headers.length > 6) idx.caseTask = 6;
-                if (idx.abertoEm === undefined && headers.length > 0) idx.abertoEm = 0;
-                if (idx.status === undefined && headers.length > 36) idx.status = 36;
-                idx.descricaoProduto = 23;
             }
+            function getCol(key) { return headers[idx[key]]; }
 
-            function getCol(key) {
-                return idx[key] !== undefined ? headers[idx[key]] : null;
+            function formatCurrency(val) {
+                if (typeof val !== 'number' || isNaN(val)) return 'R$ 0,00';
+                return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            }
+            function formatNumber(val) {
+                if (typeof val !== 'number' || isNaN(val)) return '0';
+                return val.toLocaleString('pt-BR');
+            }
+            function formatK(val) {
+                if (typeof val !== 'number' || isNaN(val)) return '0k';
+                const valueInK = val / 1000;
+                const absValue = Math.abs(valueInK);
+                const maxDigits = absValue >= 100 ? 0 : absValue >= 10 ? 1 : absValue >= 1 ? 2 : 3;
+                return valueInK.toLocaleString('pt-BR', { maximumFractionDigits: maxDigits }) + 'k';
+            }
+            function escapeHTML(str) {
+                if (!str) return '';
+                return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
             }
 
             function computeTotalDivergencia(data) {
                 const col = getCol('valorDivergencia');
                 if (!col) return 0;
-                return data.reduce((sum, r) => sum + (typeof r[col] === 'number' ? r[col] : 0), 0);
+                return data.reduce((acc, r) => acc + (typeof r[col] === 'number' ? r[col] : 0), 0);
             }
-
-            function formatCurrency(val) {
-                return 'R$ ' + Math.round(val).toLocaleString('pt-BR');
-            }
-
-            function formatNumber(val) {
-                return Math.round(val).toLocaleString('pt-BR');
-            }
-
-            function formatK(val) {
-                if (val >= 1000) {
-                    const k = Math.round(val / 1000);
-                    return k + 'k';
-                }
-                return Math.round(val).toString();
-            }
-
-            function escapeHTML(str) {
-                const div = document.createElement('div');
-                div.textContent = str || '';
-                return div.innerHTML;
-            }
-
-            function downloadChart(chartId, filename) {
-                const chart = charts[chartId];
-                if (!chart) return toast('Gráfico não disponível.', 'error');
-                const url = chart.toBase64Image('image/png', 1.0);
-                const link = document.createElement('a');
-                link.download = filename + '.png';
-                link.href = url;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                toast('📷 Gráfico salvo!', 'success');
-            }
-
-            window.copyTable = function(tableWrapperId) {
-                const wrapper = document.getElementById(tableWrapperId);
-                if (!wrapper) return toast('Tabela não encontrada.', 'error');
-                const table = wrapper.querySelector('table');
-                if (!table) return toast('Nenhuma tabela para copiar.', 'warning');
-                const range = document.createRange();
-                range.selectNodeContents(table);
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(range);
-                try {
-                    document.execCommand('copy');
-                    toast('📋 Tabela copiada (com cabeçalho)!', 'success');
-                } catch (err) {
-                    toast('Falha ao copiar.', 'error');
-                }
-                selection.removeAllRanges();
-            };
-
-            document.getElementById('btnCameraTipo').addEventListener('click', () => downloadChart('chartTipo', 'divergencias_por_tipo'));
-            document.getElementById('btnCameraLoja').addEventListener('click', () => downloadChart('chartLoja', 'divergencias_por_loja'));
-            document.getElementById('btnCameraItem').addEventListener('click', () => downloadChart('chartItem', 'divergencias_por_item'));
-            document.getElementById('btnCameraStatus').addEventListener('click', () => downloadChart('chartStatus', 'divergencias_por_status'));
-            document.getElementById('btnCameraAprovacao').addEventListener('click', () => downloadChart('chartAprovacao', 'indice_aprovacao'));
 
             function populateDateMode() {
-                const dateMode = document.getElementById('dateMode');
-                dateMode.value = 'none';
-                updateDateInputs('none');
-                dateMode.addEventListener('change', () => {
-                    updateDateInputs(dateMode.value);
-                    applyAllFilters();
-                    renderAll();
-                });
-            }
-
-            function updateDateInputs(mode) {
+                const mode = document.getElementById('dateMode');
                 const container = document.getElementById('dateInputs');
-                container.innerHTML = '';
-                if (mode === 'none') {
-                    container.style.display = 'none';
-                } else if (mode === 'single') {
-                    container.style.display = 'flex';
-                    container.innerHTML = '<input type="date" id="singleDate" title="Selecione um dia">';
-                    document.getElementById('singleDate').addEventListener('change', () => { applyAllFilters(); renderAll(); });
-                } else if (mode === 'range') {
-                    container.style.display = 'flex';
-                    container.innerHTML = '<input type="date" id="startDate" title="Data inicial"> até <input type="date" id="endDate" title="Data final">';
-                    document.getElementById('startDate').addEventListener('change', () => { applyAllFilters(); renderAll(); });
-                    document.getElementById('endDate').addEventListener('change', () => { applyAllFilters(); renderAll(); });
-                } else if (mode === 'month') {
-                    container.style.display = 'flex';
-                    container.innerHTML = '<input type="month" id="monthPicker" title="Selecione o mês">';
-                    document.getElementById('monthPicker').addEventListener('change', () => { applyAllFilters(); renderAll(); });
-                }
+                mode.onchange = () => {
+                    container.innerHTML = '';
+                    if (mode.value === 'single') container.innerHTML = '<input type="date" id="dateStart">';
+                    else if (mode.value === 'range') container.innerHTML = '<input type="date" id="dateStart"> <span>até</span> <input type="date" id="dateEnd">';
+                    else if (mode.value === 'month') {
+                        const meses = [...new Set(allData.map(r => r['KEY MÊS']).filter(Boolean))].sort();
+                        let h = '<select id="dateStart"><option value="">Selecionar mês...</option>';
+                        meses.forEach(m => h += `<option value="${m}">${m}</option>`);
+                        h += '</select>';
+                        container.innerHTML = h;
+                    }
+                    const inputs = container.querySelectorAll('input, select');
+                    inputs.forEach(i => i.onchange = () => { applyAllFilters(); renderAll(); });
+                    applyAllFilters(); renderAll();
+                };
             }
 
             function getDateFilterFn() {
                 const mode = document.getElementById('dateMode').value;
-                const dataCol = getCol('abertoEm');
-                if (!dataCol || mode === 'none') return () => true;
-
+                const startVal = document.getElementById('dateStart')?.value;
+                const endVal = document.getElementById('dateEnd')?.value;
+                if (mode === 'none' || !startVal) return () => true;
                 if (mode === 'single') {
-                    return function(row) {
-                        const input = document.getElementById('singleDate');
-                        if (!input || !input.value) return true;
-                        const dateObj = row['_dataObj'];
-                        if (!dateObj) return false;
-                        const filterDate = new Date(input.value + 'T00:00:00');
-                        return dateObj.toDateString() === filterDate.toDateString();
-                    };
-                } else if (mode === 'range') {
-                    return function(row) {
-                        const startInput = document.getElementById('startDate');
-                        const endInput = document.getElementById('endDate');
-                        const dateObj = row['_dataObj'];
-                        if (!dateObj) return false;
-                        const start = startInput && startInput.value ? new Date(startInput.value + 'T00:00:00') : null;
-                        const end = endInput && endInput.value ? new Date(endInput.value + 'T23:59:59') : null;
-                        if (start && dateObj < start) return false;
-                        if (end && dateObj > end) return false;
-                        return true;
-                    };
-                } else if (mode === 'month') {
-                    return function(row) {
-                        const monthInput = document.getElementById('monthPicker');
-                        if (!monthInput || !monthInput.value) return true;
-                        const [year, month] = monthInput.value.split('-').map(Number);
-                        const dateObj = row['_dataObj'];
-                        if (!dateObj) return false;
-                        return dateObj.getFullYear() === year && dateObj.getMonth() === (month - 1);
-                    };
+                    const d = new Date(startVal + 'T00:00:00');
+                    return r => r._dataObj && r._dataObj.toDateString() === d.toDateString();
                 }
+                if (mode === 'range' && endVal) {
+                    const s = new Date(startVal + 'T00:00:00'), e = new Date(endVal + 'T23:59:59');
+                    return r => r._dataObj && r._dataObj >= s && r._dataObj <= e;
+                }
+                if (mode === 'month') return r => r['KEY MÊS'] === startVal;
                 return () => true;
             }
 
+            function createMultiselect(containerId, optionsId, values, onChange) {
+                const container = document.getElementById(containerId);
+                const optionsContainer = document.getElementById(optionsId);
+                const selectedSpan = container.querySelector('.multiselect-selected span');
+                
+                const listDiv = document.createElement('div');
+                listDiv.style.maxHeight = '200px';
+                listDiv.style.overflowY = 'auto';
+                
+                optionsContainer.innerHTML = '';
+                values.forEach(val => {
+                    const div = document.createElement('div');
+                    div.className = 'multiselect-option';
+                    div.innerHTML = `<input type="checkbox" value="${val}"> ${val}`;
+                    div.onclick = (e) => {
+                        e.stopPropagation();
+                        if (e.target.tagName !== 'INPUT') {
+                            const cb = div.querySelector('input');
+                            cb.checked = !cb.checked;
+                        }
+                    };
+                    listDiv.appendChild(div);
+                });
+                optionsContainer.appendChild(listDiv);
+
+                const footer = document.createElement('div');
+                footer.className = 'multiselect-footer';
+                footer.innerHTML = `
+                    <button class="btn-mini btn-apply">Aplicar</button>
+                    <button class="btn-mini btn-clear">Limpar</button>
+                `;
+                footer.querySelector('.btn-apply').onclick = (e) => {
+                    e.stopPropagation();
+                    updateText();
+                    container.classList.remove('active');
+                    onChange();
+                };
+                footer.querySelector('.btn-clear').onclick = (e) => {
+                    e.stopPropagation();
+                    optionsContainer.querySelectorAll('input').forEach(i => i.checked = false);
+                    updateText();
+                    container.classList.remove('active');
+                    onChange();
+                };
+                optionsContainer.appendChild(footer);
+
+                function updateText() {
+                    const checked = Array.from(optionsContainer.querySelectorAll('input:checked')).map(i => i.value);
+                    if (checked.length === 0) selectedSpan.textContent = 'Todos';
+                    else if (checked.length === 1) selectedSpan.textContent = checked[0];
+                    else selectedSpan.textContent = `${checked.length} selecionados`;
+                }
+
+                container.querySelector('.multiselect-selected').onclick = (e) => {
+                    e.stopPropagation();
+                    const isActive = container.classList.contains('active');
+                    document.querySelectorAll('.multiselect-container').forEach(c => c.classList.remove('active'));
+                    if (!isActive) container.classList.add('active');
+                };
+
+                optionsContainer.onclick = (e) => e.stopPropagation();
+                updateText();
+            }
+
+            function getMultiselectValues(optionsId) {
+                const container = document.getElementById(optionsId);
+                if (!container) return null;
+                const checked = Array.from(container.querySelectorAll('input:checked')).map(i => i.value);
+                return checked.length > 0 ? checked : null;
+            }
+
             function populateFilters() {
-                const statusSelect = document.getElementById('statusFilter');
-                statusSelect.innerHTML = '<option value="Todos">📌 Todos</option>';
-                statusValues.forEach(s => {
-                    const option = document.createElement('option');
-                    option.value = s;
-                    option.textContent = s;
-                    statusSelect.appendChild(option);
-                });
-                statusSelect.value = 'Todos';
+                createMultiselect('statusFilterContainer', 'statusOptions', statusValues, () => { applyAllFilters(); renderAll(); });
+                createMultiselect('tipoFilterContainer', 'tipoOptions', tipoValues, () => { applyAllFilters(); renderAll(); });
+                createMultiselect('turnoFilterContainer', 'turnoOptions', ['1º Turno', '2º Turno', '3º Turno'], () => { applyAllFilters(); renderAll(); });
+                const turnoProduzidoValues = [...new Set(allData.map(r => String(r['TURNO_INI'] || '').trim()).filter(Boolean))].sort();
+                createMultiselect('turnoProduzidoFilterContainer', 'turnoProduzidoOptions', turnoProduzidoValues, () => { applyAllFilters(); renderAll(); });
 
-                const tipoSelect = document.getElementById('tipoFilter');
-                tipoSelect.innerHTML = '<option value="Todos">📌 Todos</option>';
-                tipoValues.forEach(t => {
-                    const option = document.createElement('option');
-                    option.value = t;
-                    option.textContent = t;
-                    tipoSelect.appendChild(option);
-                });
-                tipoSelect.value = 'Todos';
+                document.getElementById('pltFechadoFilter').onchange = () => renderColaboradoresOfensores();
+                document.addEventListener('click', () => document.querySelectorAll('.multiselect-container').forEach(c => c.classList.remove('active')));
+            }
 
-                statusSelect.addEventListener('change', () => { applyAllFilters(); renderAll(); });
-                tipoSelect.addEventListener('change', () => { applyAllFilters(); renderAll(); });
-                document.getElementById('turnoFilter').addEventListener('change', () => { applyAllFilters(); renderAll(); });
+            function applyAllFilters() {
+                const selStatus = getMultiselectValues('statusOptions');
+                const selTipo = getMultiselectValues('tipoOptions');
+                const selTurno = getMultiselectValues('turnoOptions');
+                const selTurnoProduzido = getMultiselectValues('turnoProduzidoOptions');
+                
+                const dateFilterFn = getDateFilterFn();
+                filteredData = allData.filter(dateFilterFn);
+
+                if (selStatus) { 
+                    const col = getCol('status'); 
+                    if (col) filteredData = filteredData.filter(r => selStatus.includes(String(r[col]))); 
+                }
+                if (selTipo) { 
+                    const col = getCol('tipoDivergencia'); 
+                    if (col) filteredData = filteredData.filter(r => selTipo.includes(String(r[col]))); 
+                }
+                if (selTurno) {
+                    filteredData = filteredData.filter(r => {
+                        const n = String(r['N LOJA'] || '').trim();
+                        const lojaNum = parseInt(n, 10);
+                        return selTurno.includes(turnoPorLoja[lojaNum]);
+                    });
+                }
+                if (selTurnoProduzido) {
+                    filteredData = filteredData.filter(r => selTurnoProduzido.includes(String(r['TURNO_INI'] || '').trim()));
+                }
+                if (smartSearchValue) {
+                    const isNumeric = /^\d+$/.test(smartSearchValue);
+                    if (isNumeric) filteredData = filteredData.filter(r => String(r['N LOJA'] || '') === smartSearchValue);
+                    else { const col = getCol('lojaDestino'); if (col) filteredData = filteredData.filter(r => String(r[col] || '').toLowerCase() === smartSearchValue.toLowerCase()); }
+                }
+                allFiltered = [...filteredData];
+                allPage = 1;
+                chamadoPage = 1;
             }
 
             function setupSmartSearch() {
                 const input = document.getElementById('smartSearch');
                 const dropdown = document.getElementById('suggestionsDropdown');
-
-                input.addEventListener('input', function() {
+                input.oninput = function() {
                     const term = this.value.trim();
-                    if (term.length === 0) {
-                        dropdown.style.display = 'none';
-                        smartSearchValue = '';
-                        applyAllFilters();
-                        renderAll();
-                        return;
-                    }
-
+                    if (!term) { dropdown.style.display = 'none'; smartSearchValue = ''; applyAllFilters(); renderAll(); return; }
                     const isNumeric = /^\d+$/.test(term);
                     let suggestions = [];
-
                     if (isNumeric) {
-                        const nLojaCol = 'N LOJA';
-                        const valores = allData.map(r => String(r[nLojaCol] || '')).filter(v => v.includes(term));
+                        const valores = allData.map(r => String(r['N LOJA'] || '')).filter(v => v.includes(term));
                         suggestions = [...new Set(valores)].sort();
                     } else {
                         const lojaCol = getCol('lojaDestino');
@@ -1387,247 +993,148 @@
                             suggestions = [...new Set(valores)].sort();
                         }
                     }
-
                     suggestions = suggestions.slice(0, 10);
-
-                    if (suggestions.length > 0) {
-                        dropdown.innerHTML = suggestions.map(s => `<div class="suggestion-item" data-value="${escapeHTML(s)}">${escapeHTML(s)}</div>`).join('');
+                    if (suggestions.length) {
+                        dropdown.innerHTML = suggestions.map(s => `<div class="suggestion-item">${escapeHTML(s)}</div>`).join('');
                         dropdown.style.display = 'block';
-                    } else {
-                        dropdown.style.display = 'none';
-                    }
-                });
-
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        smartSearchValue = this.value.trim();
-                        dropdown.style.display = 'none';
-                        applyAllFilters();
-                        renderAll();
-                    }
-                });
-
-                dropdown.addEventListener('click', function(e) {
+                    } else dropdown.style.display = 'none';
+                };
+                input.onkeydown = (e) => { if (e.key === 'Enter') { smartSearchValue = input.value.trim(); dropdown.style.display = 'none'; applyAllFilters(); renderAll(); } };
+                dropdown.onclick = (e) => {
                     if (e.target.classList.contains('suggestion-item')) {
-                        const value = e.target.dataset.value;
-                        input.value = value;
-                        smartSearchValue = value;
+                        input.value = e.target.textContent;
+                        smartSearchValue = e.target.textContent;
                         dropdown.style.display = 'none';
-                        applyAllFilters();
-                        renderAll();
+                        applyAllFilters(); renderAll();
                     }
-                });
-
-                document.addEventListener('click', function(e) {
-                    if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-                        dropdown.style.display = 'none';
-                    }
-                });
+                };
             }
 
-            function applyAllFilters() {
-                const selectedStatus = document.getElementById('statusFilter').value;
-                const selectedTipo = document.getElementById('tipoFilter').value;
-                const selectedTurno = document.getElementById('turnoFilter').value;
-                const dateFilterFn = getDateFilterFn();
-
-                filteredData = [...allData];
-                filteredData = filteredData.filter(dateFilterFn);
-
-                if (selectedStatus !== 'Todos') {
-                    const statusCol = getCol('status');
-                    if (statusCol) filteredData = filteredData.filter(r => r[statusCol] === selectedStatus);
-                }
-                if (selectedTipo !== 'Todos') {
-                    const tipoCol = getCol('tipoDivergencia');
-                    if (tipoCol) filteredData = filteredData.filter(r => r[tipoCol] === selectedTipo);
-                }
-
-                if (selectedTurno !== 'Todos') {
-                    filteredData = filteredData.filter(r => {
-                        const nLoja = String(r['N LOJA'] || '').trim();
-                        if (!nLoja) return false;
-                        const lojaNum = parseInt(nLoja, 10);
-                        if (isNaN(lojaNum)) return false;
-                        return turnoPorLoja[lojaNum] === selectedTurno;
+            function setupColaboradorSearch() {
+                const input = document.getElementById('colaboradorSearch');
+                const dropdown = document.getElementById('colaboradorSuggestions');
+                if (!input || !dropdown) return;
+                input.oninput = function() {
+                    const term = this.value.trim();
+                    colaboradorSearchValue = term;
+                    if (!term) { dropdown.style.display = 'none'; renderColaboradoresOfensores(); return; }
+                    const isNumeric = /^\d+$/.test(term);
+                    const sugestoesMap = new Map();
+                    filteredData.forEach(row => {
+                        const matricula = String(row['CODPRODUTIVO'] || '').trim();
+                        const produtivo = String(row['PRODUTIVO'] || '').trim();
+                        if (!produtivo) return;
+                        if (isNumeric && matricula.includes(term)) sugestoesMap.set(matricula, `${matricula} - ${produtivo}`);
+                        else if (!isNumeric && produtivo.toLowerCase().includes(term.toLowerCase())) sugestoesMap.set(produtivo, `${matricula ? matricula + ' - ' : ''}${produtivo}`);
                     });
-                }
-
-                if (smartSearchValue) {
-                    const isNumeric = /^\d+$/.test(smartSearchValue);
-                    if (isNumeric) {
-                        filteredData = filteredData.filter(r => String(r['N LOJA'] || '') === smartSearchValue);
-                    } else {
-                        const lojaCol = getCol('lojaDestino');
-                        if (lojaCol) {
-                            filteredData = filteredData.filter(r => String(r[lojaCol] || '').toLowerCase() === smartSearchValue.toLowerCase());
-                        }
-                    }
-                }
-
-                document.getElementById('searchAll').value = '';
-                allFiltered = [...filteredData];
-                allPage = 1;
-                chamadoPage = 1;
+                    const sugestoes = [...sugestoesMap.values()].slice(0, 10);
+                    if (sugestoes.length) {
+                        dropdown.innerHTML = sugestoes.map(s => `<div class="suggestion-item">${escapeHTML(s)}</div>`).join('');
+                        dropdown.style.display = 'block';
+                    } else dropdown.style.display = 'none';
+                    renderColaboradoresOfensores();
+                };
+                dropdown.onclick = (e) => {
+                    if (!e.target.classList.contains('suggestion-item')) return;
+                    input.value = e.target.textContent;
+                    colaboradorSearchValue = e.target.textContent;
+                    dropdown.style.display = 'none';
+                    renderColaboradoresOfensores();
+                };
             }
 
             function resetTabs() {
-                document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
-                document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === 0));
+                document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+                document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===0));
             }
 
-            document.getElementById('tabNav').addEventListener('click', e => {
+            document.getElementById('tabNav').onclick = e => {
                 if (e.target.classList.contains('tab-btn')) {
                     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                     e.target.classList.add('active');
-                    const id = e.target.dataset.tab;
                     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    document.getElementById(id).classList.add('active');
-                    setTimeout(() => {
-                        Object.values(charts).forEach(c => { if (c && c.resize) c.resize(); });
-                    }, 150);
+                    document.getElementById(e.target.dataset.tab).classList.add('active');
+                    setTimeout(() => Object.values(charts).forEach(c => c?.resize()), 150);
                 }
-            });
+            };
 
             function renderKPIs() {
                 const data = filteredData;
-                const totalDiv = computeTotalDivergencia(data);
-                const colLoja = getCol('lojaDestino');
-                const lojasUnicas = colLoja ? new Set(data.map(r => r[colLoja]).filter(Boolean)).size : 0;
-                const colTipo = getCol('tipoDivergencia');
-                const tiposUnicos = colTipo ? new Set(data.map(r => r[colTipo]).filter(Boolean)).size : 0;
-                const colChamado = getCol('caseTask');
-                const chamadosUnicos = colChamado ? new Set(data.map(r => r[colChamado]).filter(Boolean)).size : 0;
-                const chamadosAcima5k = colChamado && getCol('valorDivergencia') ?
-                    aggregateByCol('caseTask', 'valorDivergencia', data).filter(r => r.total > 5000).length : 0;
-
+                const total = computeTotalDivergencia(data);
+                const lojas = getCol('lojaDestino') ? new Set(data.map(r => r[getCol('lojaDestino')]).filter(Boolean)).size : 0;
+                const tipos = getCol('tipoDivergencia') ? new Set(data.map(r => r[getCol('tipoDivergencia')]).filter(Boolean)).size : 0;
+                const chamados = getCol('caseTask') ? new Set(data.map(r => r[getCol('caseTask')]).filter(Boolean)).size : 0;
+                const acima5k = getCol('caseTask') && getCol('valorDivergencia') ? aggregateByCol('caseTask').filter(r => r.total > 5000).length : 0;
                 document.getElementById('kpiGrid').innerHTML = `
-                    <div class="kpi-card"><span class="kpi-label">💰 Total Divergências</span><span class="kpi-value">${formatCurrency(totalDiv)}</span></div>
-                    <div class="kpi-card"><span class="kpi-label">🏪 Lojas Envolvidas</span><span class="kpi-value">${formatNumber(lojasUnicas)}</span></div>
-                    <div class="kpi-card"><span class="kpi-label">📌 Tipos de Divergência</span><span class="kpi-value">${formatNumber(tiposUnicos)}</span></div>
-                    <div class="kpi-card"><span class="kpi-label">🎫 Chamados</span><span class="kpi-value">${formatNumber(chamadosUnicos)}</span></div>
-                    <div class="kpi-card"><span class="kpi-label">🔴 Chamados > R$ 5.000</span><span class="kpi-value danger">${formatNumber(chamadosAcima5k)}</span></div>
+                    <div class="kpi-card"><span class="kpi-label">💰 Total Divergências</span><span class="kpi-value">${formatCurrency(total)}</span></div>
+                    <div class="kpi-card"><span class="kpi-label">🏪 Lojas</span><span class="kpi-value">${formatNumber(lojas)}</span></div>
+                    <div class="kpi-card"><span class="kpi-label">📌 Tipos de Divergência</span><span class="kpi-value">${formatNumber(tipos)}</span></div>
+                    <div class="kpi-card"><span class="kpi-label">🎫 Chamados</span><span class="kpi-value">${formatNumber(chamados)}</span></div>
+                    <div class="kpi-card"><span class="kpi-label">🔴 Chamados > R$ 5.000</span><span class="kpi-value danger">${formatNumber(acima5k)}</span></div>
                 `;
             }
 
             function aggregateByCol(key, valueKey = 'valorDivergencia', data = filteredData) {
-                const col = getCol(key);
-                const valCol = getCol(valueKey);
+                const col = getCol(key), valCol = getCol(valueKey);
                 if (!col || !valCol) return [];
                 const map = {};
                 data.forEach(r => {
                     const k = r[col] !== null && r[col] !== undefined ? String(r[col]) : '(vazio)';
-                    const v = typeof r[valCol] === 'number' && !isNaN(r[valCol]) ? r[valCol] : 0;
+                    const v = typeof r[valCol] === 'number' ? r[valCol] : 0;
                     if (!map[k]) map[k] = { key: k, total: 0, count: 0 };
-                    map[k].total += v;
-                    map[k].count += 1;
+                    map[k].total += v; map[k].count++;
                 });
-                return Object.values(map).sort((a, b) => b.total - a.total);
+                return Object.values(map).sort((a,b) => b.total - a.total);
             }
 
             function renderTable(containerId, columns, data, options = {}) {
-                const { sortable = true, highlightCol = null, highlightThreshold = null, highlightClass = 'highlight-red', colFormatters = [], dblClickCol = null } = options;
+                const { sortable = true, highlightCol, highlightThreshold, highlightClass = 'highlight-red', colFormatters = [], dblClickCol } = options;
                 const container = document.getElementById(containerId);
                 if (!container) return;
-                if (data.length === 0) {
-                    container.innerHTML = '<div class="empty-state"><span class="empty-icon">📭</span><p>Nenhum dado disponível.</p></div>';
-                    return;
-                }
+                if (!data.length) { container.innerHTML = '<div class="empty-state">📭 Nenhum dado</div>'; return; }
                 let html = '<table><thead><tr>';
-                columns.forEach((col, i) => {
-                    html += `<th class="${sortable ? 'sortable' : ''}" data-colidx="${i}">${escapeHTML(col)} ${sortable ? '<span class="sort-icon">⇅</span>' : ''}</th>`;
-                });
+                columns.forEach(col => html += `<th class="${sortable?'sortable':''}">${escapeHTML(col)}</th>`);
                 html += '</tr></thead><tbody>';
                 data.forEach(row => {
-                    let highlight = false;
-                    if (highlightCol !== null && highlightThreshold !== null) {
-                        const val = row[highlightCol];
-                        if (typeof val === 'number' && val > highlightThreshold) highlight = true;
-                    }
-                    const coluna = dblClickCol || null;
-                    const valor = coluna ? String(row[0] ?? '') : null;
-                    html += `<tr class="${highlight ? highlightClass : ''}" data-coluna="${coluna || ''}" data-valor="${valor || ''}">`;
-                    row.forEach((cell, idx) => {
-                        let display = cell;
-                        if (colFormatters[idx]) {
-                            display = colFormatters[idx](cell);
-                        } else if (typeof cell === 'number') {
-                            display = formatNumber(cell);
-                        }
+                    let hl = false;
+                    if (highlightCol !== undefined && highlightThreshold !== undefined && row[highlightCol] > highlightThreshold) hl = true;
+                    const valor = dblClickCol ? String(row[0] ?? '') : null;
+                    html += `<tr class="${hl?highlightClass:''}" data-valor="${valor||''}">`;
+                    row.forEach((cell, i) => {
+                        let display = colFormatters[i] ? colFormatters[i](cell) : (typeof cell === 'number' ? formatNumber(cell) : cell);
                         html += `<td>${escapeHTML(String(display ?? ''))}</td>`;
                     });
                     html += '</tr>';
                 });
                 html += '</tbody></table>';
                 container.innerHTML = html;
-                if (sortable) {
-                    container.querySelectorAll('th.sortable').forEach(th => {
-                        th.addEventListener('click', () => {
-                            const colIdx = parseInt(th.dataset.colidx);
-                            const sorted = [...data].sort((a, b) => {
-                                const va = a[colIdx];
-                                const vb = b[colIdx];
-                                if (typeof va === 'number' && typeof vb === 'number') return va - vb;
-                                return String(va ?? '').localeCompare(String(vb ?? ''));
-                            });
-                            if (th.classList.contains('sorted-asc')) {
-                                sorted.reverse();
-                                th.classList.remove('sorted-asc');
-                                th.classList.add('sorted-desc');
-                                th.querySelector('.sort-icon').textContent = ' ▼';
-                            } else {
-                                th.classList.remove('sorted-desc');
-                                th.classList.add('sorted-asc');
-                                th.querySelector('.sort-icon').textContent = ' ▲';
-                            }
-                            renderTable(containerId, columns, sorted, options);
-                        });
-                    });
-                }
             }
 
-            function renderBarChart(canvasId, labels, datasets, title, options = {}) {
+            function renderBarChart(canvasId, labels, datasets, title, opts = {}) {
                 const canvas = document.getElementById(canvasId);
                 if (!canvas) return;
                 if (charts[canvasId]) charts[canvasId].destroy();
-                const ctx = canvas.getContext('2d');
-
-                const {
-                    datalabelFormatter = (value) => formatCurrency(value),
-                    tooltipLabelFormatter = (value) => formatCurrency(value)
-                } = options;
-
-                const finalDatalabels = {
-                    anchor: 'end',
-                    align: 'top',
-                    formatter: (value) => datalabelFormatter(value),
-                    font: { weight: 'bold', size: 12 },
-                    color: '#1e293b',
-                };
-
-                charts[canvasId] = new Chart(ctx, {
+                const { datalabelFormatter = v => formatK(v), tooltipLabelFormatter = v => formatK(v) } = opts;
+                const isDark = document.body.classList.contains('dark');
+                const chartTextColor = isDark ? '#e2e8f0' : '#1e293b';
+                const chartGridColor = isDark ? '#334155' : '#e2e8f0';
+                charts[canvasId] = new Chart(canvas.getContext('2d'), {
                     type: 'bar',
                     data: { labels, datasets },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
+                        responsive: true, maintainAspectRatio: false,
                         layout: { padding: { top: 25 } },
                         plugins: {
-                            legend: { display: datasets.length > 1, position: 'bottom' },
-                            title: { display: !!title, text: title, font: { size: 14 } },
-                            tooltip: {
-                                callbacks: {
-                                    label: ctx => `${ctx.dataset.label}: ${tooltipLabelFormatter(ctx.parsed.y)}`
-                                }
-                            },
-                            datalabels: finalDatalabels,
+                            legend: { display: datasets.length > 1, position: 'bottom', labels: { color: chartTextColor } },
+                            title: { display: !!title, text: title, color: chartTextColor },
+                            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${tooltipLabelFormatter(ctx.parsed.y)}` } },
+                            datalabels: { anchor: 'end', align: 'top', formatter: v => datalabelFormatter(v), font: { weight: 'bold', size: 12 }, color: chartTextColor }
                         },
                         scales: {
-                            x: { ticks: { maxRotation: 45, font: { size: 10 } } },
-                            y: { beginAtZero: true, ticks: { callback: v => tooltipLabelFormatter(v) } }
+                            x: { ticks: { maxRotation: 45, color: chartTextColor }, grid: { color: chartGridColor } },
+                            y: { beginAtZero: true, ticks: { color: chartTextColor, callback: v => tooltipLabelFormatter(v) }, grid: { color: chartGridColor } }
                         }
-                    },
+                    }
                 });
             }
 
@@ -1640,54 +1147,35 @@
                 renderChamados();
                 renderStatusValor();
                 renderAprovacao();
-                setTimeout(() => {
-                    Object.values(charts).forEach(c => { if (c && c.resize) c.resize(); });
-                }, 200);
+                renderColaboradoresOfensores();
             }
 
             function renderDadosBrutos() {
                 allFiltered = [...filteredData];
-                const searchInput = document.getElementById('searchAll');
-                searchInput.value = '';
-                searchInput.oninput = () => {
-                    const term = searchInput.value.toLowerCase();
-                    allFiltered = filteredData.filter(r =>
-                        headers.some(h => String(r[h] ?? '').toLowerCase().includes(term))
-                    );
-                    allPage = 1;
-                    renderAllTablePage();
+                document.getElementById('searchAll').oninput = () => {
+                    const term = document.getElementById('searchAll').value.toLowerCase();
+                    allFiltered = filteredData.filter(r => headers.some(h => String(r[h]??'').toLowerCase().includes(term)));
+                    allPage = 1; renderAllTablePage();
                 };
-                allPage = 1;
                 renderAllTablePage();
             }
 
             function renderAllTablePage() {
-                const total = allFiltered.length;
-                const totalPages = Math.ceil(total / allPerPage) || 1;
-                if (allPage > totalPages) allPage = totalPages;
-                const start = (allPage - 1) * allPerPage;
-                const pageData = allFiltered.slice(start, start + allPerPage);
-                const rows = pageData.map(r => headers.map(c => r[c]));
-                renderTable('allTableWrapper', headers, rows, { sortable: true, dblClickCol: getCol('caseTask') });
+                const total = allFiltered.length, pages = Math.ceil(total / allPerPage) || 1;
+                const start = (allPage-1)*allPerPage, pageData = allFiltered.slice(start, start+allPerPage);
+                renderTable('allTableWrapper', headers, pageData.map(r => headers.map(c => r[c])), { sortable: true, dblClickCol: getCol('caseTask') });
                 let pagHTML = '';
-                if (totalPages > 1) {
+                if (pages > 1) {
                     pagHTML += `<button ${allPage===1?'disabled':''} data-p="prev">◀</button>`;
-                    for (let p = 1; p <= totalPages; p++) {
-                        if (totalPages > 15 && p > 3 && p < totalPages - 2 && Math.abs(p - allPage) > 2) {
-                            if (p === 4) pagHTML += '<span>…</span>';
-                            continue;
-                        }
-                        pagHTML += `<button data-p="${p}" class="${p===allPage?'active-page':''}">${p}</button>`;
-                    }
-                    pagHTML += `<button ${allPage===totalPages?'disabled':''} data-p="next">▶</button>`;
+                    for (let p=1; p<=pages; p++) pagHTML += `<button data-p="${p}" class="${p===allPage?'active-page':''}">${p}</button>`;
+                    pagHTML += `<button ${allPage===pages?'disabled':''} data-p="next">▶</button>`;
                 }
                 document.getElementById('allPagination').innerHTML = pagHTML;
                 document.getElementById('allPagination').onclick = (e) => {
                     const p = e.target.dataset.p;
-                    if (p === 'prev') allPage = Math.max(1, allPage - 1);
-                    else if (p === 'next') allPage = Math.min(totalPages, allPage + 1);
+                    if (p === 'prev') allPage = Math.max(1, allPage-1);
+                    else if (p === 'next') allPage = Math.min(pages, allPage+1);
                     else if (p) allPage = parseInt(p);
-                    else return;
                     renderAllTablePage();
                 };
                 setupTableDoubleClick('allTableWrapper', getCol('caseTask'));
@@ -1695,266 +1183,137 @@
 
             function renderTipoDivergencia() {
                 const agg = aggregateByCol('tipoDivergencia');
-                const columns = ['Tipo de Divergência', 'Total Divergência', 'Qtd Ocorrências'];
-                const rows = agg.map(r => [r.key, r.total, r.count]);
-                const formatters = [null, formatCurrency, formatNumber];
-                renderTable('tipoTableWrapper', columns, rows, { sortable: true, colFormatters: formatters, dblClickCol: getCol('tipoDivergencia') });
-                if (agg.length > 0) {
-                    renderBarChart('chartTipo', agg.map(r => r.key), [
-                        { label: 'Valor Total', data: agg.map(r => r.total), backgroundColor: '#2563eb', borderRadius: 6 }
-                    ], 'Valor por Tipo');
-                }
+                renderTable('tipoTableWrapper', ['Tipo de Divergência', 'Total Divergência', 'Qtd Ocorrências'], agg.map(r => [r.key, r.total, r.count]), { colFormatters: [null, formatCurrency, formatNumber], dblClickCol: getCol('tipoDivergencia') });
+                if (agg.length) renderBarChart('chartTipo', agg.map(r=>r.key), [{ label: 'Valor Total', data: agg.map(r=>r.total), backgroundColor: '#2563eb' }], 'Valor por Tipo');
                 setupTableDoubleClick('tipoTableWrapper', getCol('tipoDivergencia'));
             }
 
             function renderLoja() {
                 const agg = aggregateByCol('lojaDestino');
-                const columns = ['Loja Destino', 'Total Divergência', 'Qtd Ocorrências'];
-                const rows = agg.map(r => [r.key, r.total, r.count]);
-                const formatters = [null, formatCurrency, formatNumber];
-                renderTable('lojaTableWrapper', columns, rows, { sortable: true, colFormatters: formatters, dblClickCol: getCol('lojaDestino') });
-                if (agg.length > 0) {
-                    const top = agg.slice(0, 10);
-                    renderBarChart('chartLoja', top.map(r => r.key), [
-                        { label: 'Valor Total', data: top.map(r => r.total), backgroundColor: '#2563eb', borderRadius: 6 }
-                    ], 'Top 10 Lojas', { datalabelFormatter: (v) => formatK(v), tooltipLabelFormatter: (v) => formatK(v) });
+                renderTable('lojaTableWrapper', ['Loja Destino', 'Total Divergência', 'Qtd Ocorrências'], agg.map(r => [r.key, r.total, r.count]), { colFormatters: [null, formatCurrency, formatNumber], dblClickCol: getCol('lojaDestino') });
+                if (agg.length) {
+                    const top = agg.slice(0,10);
+                    renderBarChart('chartLoja', top.map(r=>r.key), [{ label: 'Valor Total', data: top.map(r=>r.total), backgroundColor: '#2563eb' }], 'Top 10 Lojas', { datalabelFormatter: v=>formatK(v), tooltipLabelFormatter: v=>formatK(v) });
                 }
                 setupTableDoubleClick('lojaTableWrapper', getCol('lojaDestino'));
             }
 
             function renderItem() {
                 const colDesc = getCol('descricaoProduto');
-                const colVal = getCol('valorDivergencia');
-                const map = {};
-                if (colDesc && colVal) {
-                    filteredData.forEach(r => {
-                        const desc = String(r[colDesc] ?? 'N/A');
-                        const v = typeof r[colVal] === 'number' && !isNaN(r[colVal]) ? r[colVal] : 0;
-                        if (!map[desc]) map[desc] = { key: desc, total: 0, count: 0 };
-                        map[desc].total += v;
-                        map[desc].count += 1;
-                    });
-                }
-                const agg = Object.values(map).sort((a, b) => b.total - a.total);
-                const columns = ['Item (Descrição)', 'Total Divergência', 'Qtd Ocorrências'];
-                const rows = agg.map(r => [r.key, r.total, r.count]);
-                const formatters = [null, formatCurrency, formatNumber];
-                renderTable('itemTableWrapper', columns, rows, { sortable: true, colFormatters: formatters, dblClickCol: colDesc });
-                if (agg.length > 0) {
-                    const top = agg.slice(0, 10);
-                    const shortLabels = top.map(r => r.key.length > 25 ? r.key.substring(0, 22) + '...' : r.key);
-                    renderBarChart('chartItem', shortLabels, [
-                        { label: 'Valor Total', data: top.map(r => r.total), backgroundColor: '#2563eb', borderRadius: 6 }
-                    ], 'Top 10 Itens', { datalabelFormatter: (v) => formatK(v), tooltipLabelFormatter: (v) => formatK(v) });
+                const agg = aggregateByCol('descricaoProduto');
+                renderTable('itemTableWrapper', ['Item (Descrição)', 'Total Divergência', 'Qtd Ocorrências'], agg.map(r => [r.key, r.total, r.count]), { colFormatters: [null, formatCurrency, formatNumber], dblClickCol: colDesc });
+                if (agg.length) {
+                    const top = agg.slice(0,10);
+                    renderBarChart('chartItem', top.map(r=>r.key.substring(0,20)), [{ label: 'Valor Total', data: top.map(r=>r.total), backgroundColor: '#2563eb' }], 'Top 10 Itens');
                 }
                 setupTableDoubleClick('itemTableWrapper', colDesc);
             }
 
             function renderChamados() {
-                const colChamado = getCol('caseTask');
-                const colAberto = getCol('abertoEm');
-                const colStatus = getCol('status');
-                const colLoja = getCol('lojaDestino');
-                const colVal = getCol('valorDivergencia');
-                const colTipo = getCol('tipoDivergencia');
-
+                const colChamado = getCol('caseTask'), colAberto = getCol('abertoEm'), colStatus = getCol('status'), colLoja = getCol('lojaDestino'), colVal = getCol('valorDivergencia'), colTipo = getCol('tipoDivergencia');
                 const map = {};
-                if (colChamado && colVal) {
-                    filteredData.forEach(r => {
-                        const chamado = String(r[colChamado] ?? 'N/A');
-                        const v = typeof r[colVal] === 'number' && !isNaN(r[colVal]) ? r[colVal] : 0;
-                        if (!map[chamado]) {
-                            map[chamado] = {
-                                chamado,
-                                total: 0,
-                                data: colAberto ? String(r[colAberto] ?? '') : '',
-                                status: colStatus ? String(r[colStatus] ?? '') : '',
-                                loja: colLoja ? String(r[colLoja] ?? '') : '',
-                                tipo: colTipo ? String(r[colTipo] ?? '') : '',
-                            };
-                        }
-                        map[chamado].total += v;
-                    });
-                }
-                let agg = Object.values(map).sort((a, b) => b.total - a.total);
-                const columns = ['Chamado', 'Data Abertura', 'Loja', 'Status', 'Tipo Divergência', 'Total Divergência'];
-                const rows = agg.map(r => [r.chamado, r.data, r.loja, r.status, r.tipo, r.total]);
-                const formatters = [null, null, null, null, null, formatCurrency];
-
-                window._chamadoData = rows;
-                window._chamadoColumns = columns;
-                window._chamadoFormatters = formatters;
+                if (colChamado && colVal) filteredData.forEach(r => {
+                    const ch = String(r[colChamado]??'N/A'), v = typeof r[colVal]==='number'?r[colVal]:0;
+                    if (!map[ch]) map[ch] = { chamado: ch, total: 0, data: colAberto?String(r[colAberto]??''):'', status: colStatus?String(r[colStatus]??''):'', loja: colLoja?String(r[colLoja]??''):'', tipo: colTipo?String(r[colTipo]??''):'' };
+                    map[ch].total += v;
+                });
+                const agg = Object.values(map).sort((a,b)=>b.total-a.total);
+                window._chamadoData = agg.map(r=>[r.chamado, r.data, r.loja, r.status, r.tipo, r.total]);
+                window._chamadoColumns = ['Chamado','Data Abertura','Loja','Status','Tipo Divergência','Total Divergência'];
+                window._chamadoFormatters = [null,null,null,null,null,formatCurrency];
                 chamadoPage = 1;
                 renderChamadoPage();
             }
 
             function renderChamadoPage() {
-                const data = window._chamadoData || [];
-                const columns = window._chamadoColumns || [];
-                const formatters = window._chamadoFormatters || [];
-                const total = data.length;
-                const totalPages = Math.ceil(total / chamadoPerPage) || 1;
-                if (chamadoPage > totalPages) chamadoPage = totalPages;
-                const start = (chamadoPage - 1) * chamadoPerPage;
-                const pageData = data.slice(start, start + chamadoPerPage);
-
-                renderTable('chamadoTableWrapper', columns, pageData, {
-                    sortable: false,
-                    highlightCol: 5,
-                    highlightThreshold: 5000,
-                    highlightClass: 'highlight-red',
-                    colFormatters: formatters,
-                    dblClickCol: getCol('caseTask')
-                });
-
-                let pagHTML = '';
-                if (totalPages > 1) {
-                    pagHTML += `<button ${chamadoPage===1?'disabled':''} data-p="prev">◀</button>`;
-                    for (let p = 1; p <= totalPages; p++) {
-                        if (totalPages > 15 && p > 3 && p < totalPages - 2 && Math.abs(p - chamadoPage) > 2) {
-                            if (p === 4) pagHTML += '<span>…</span>';
-                            continue;
-                        }
-                        pagHTML += `<button data-p="${p}" class="${p===chamadoPage?'active-page':''}">${p}</button>`;
-                    }
-                    pagHTML += `<button ${chamadoPage===totalPages?'disabled':''} data-p="next">▶</button>`;
+                const data = window._chamadoData || [], cols = window._chamadoColumns || [], fmt = window._chamadoFormatters || [];
+                const total = data.length, pages = Math.ceil(total / chamadoPerPage) || 1;
+                const start = (chamadoPage-1)*chamadoPerPage, pageData = data.slice(start, start+chamadoPerPage);
+                renderTable('chamadoTableWrapper', cols, pageData, { highlightCol: 5, highlightThreshold: 5000, colFormatters: fmt, dblClickCol: getCol('caseTask') });
+                let pag = '';
+                if (pages>1) {
+                    pag += `<button ${chamadoPage===1?'disabled':''} data-p="prev">◀</button>`;
+                    for (let p=1; p<=pages; p++) pag += `<button data-p="${p}" class="${p===chamadoPage?'active-page':''}">${p}</button>`;
+                    pag += `<button ${chamadoPage===pages?'disabled':''} data-p="next">▶</button>`;
                 }
-                document.getElementById('chamadoPagination').innerHTML = pagHTML;
-                document.getElementById('chamadoPagination').onclick = (e) => {
+                document.getElementById('chamadoPagination').innerHTML = pag;
+                document.getElementById('chamadoPagination').onclick = e => {
                     const p = e.target.dataset.p;
-                    if (p === 'prev') chamadoPage = Math.max(1, chamadoPage - 1);
-                    else if (p === 'next') chamadoPage = Math.min(totalPages, chamadoPage + 1);
+                    if (p === 'prev') chamadoPage = Math.max(1, chamadoPage-1);
+                    else if (p === 'next') chamadoPage = Math.min(pages, chamadoPage+1);
                     else if (p) chamadoPage = parseInt(p);
-                    else return;
                     renderChamadoPage();
                 };
                 setupTableDoubleClick('chamadoTableWrapper', getCol('caseTask'));
             }
 
-            // Valor por Status (com percentual)
             function renderStatusValor() {
                 const agg = aggregateByCol('status');
-                const totalGeral = agg.reduce((s, a) => s + a.total, 0);
-                const columns = ['Status', 'Total Divergência', '% do Total'];
-                const rows = agg.map(r => [r.key, r.total, totalGeral > 0 ? ((r.total / totalGeral) * 100).toFixed(1) + '%' : '0.0%']);
-                const formatters = [null, formatCurrency, null];
-                renderTable('statusTableWrapper', columns, rows, { sortable: true, colFormatters: formatters, dblClickCol: getCol('status') });
-                if (agg.length > 0) {
-                    renderBarChart('chartStatus', agg.map(r => r.key), [
-                        { label: 'Valor Total', data: agg.map(r => r.total), backgroundColor: '#2563eb', borderRadius: 6 }
-                    ], 'Valor Total por Status');
-                }
+                const totalGeral = agg.reduce((s,a)=>s+a.total,0);
+                renderTable('statusTableWrapper', ['Status', 'Total Divergência', '% do Total'], agg.map(r => [r.key, r.total, totalGeral>0?((r.total/totalGeral)*100).toFixed(1)+'%':'0.0%']), { colFormatters: [null, formatCurrency, null], dblClickCol: getCol('status') });
+                if (agg.length) renderBarChart('chartStatus', agg.map(r=>r.key), [{ label: 'Valor Total', data: agg.map(r=>r.total), backgroundColor: '#2563eb' }], 'Valor Total por Status');
                 setupTableDoubleClick('statusTableWrapper', getCol('status'));
             }
 
-            // Índice de Aprovação (com valor em R$ e percentual)
-            function renderAprovacao() {
-                const turnos = ['1º Turno', '2º Turno', '3º Turno'];
-                const colChamado = getCol('caseTask');
-                const colStatus = getCol('status');
+            function getDadosColaboradoresFiltrados() {
+                const filtroPlt = document.getElementById('pltFechadoFilter')?.value || 'Todos';
+                let data = filteredData.filter(r => String(r['PRODUTIVO'] || '').trim() !== '');
+                if (filtroPlt !== 'Todos') data = data.filter(r => String(r['PLTFECHADO'] || '').trim() === filtroPlt);
+                const termoBusca = String(colaboradorSearchValue || '').trim();
+                if (termoBusca) {
+                    const matriculaBusca = (termoBusca.match(/\d+/) || [''])[0];
+                    const nomeBusca = termoBusca.replace(/^\d+\s*-\s*/, '').toLowerCase();
+                    if (matriculaBusca && /^\d/.test(termoBusca)) data = data.filter(r => String(r['CODPRODUTIVO'] || '').trim().includes(matriculaBusca));
+                    else data = data.filter(r => String(r['PRODUTIVO'] || '').trim().toLowerCase().includes(nomeBusca));
+                }
+                return data;
+            }
+
+            function aggregateColaboradoresOfensores() {
                 const colVal = getCol('valorDivergencia');
-                
-                if (!colChamado || !colStatus || !colVal) {
-                    document.getElementById('aprovTableWrapper').innerHTML = '<div class="empty-state"><span class="empty-icon">📭</span><p>Colunas necessárias não encontradas.</p></div>';
-                    return;
-                }
-
-                const stats = turnos.map(turno => {
-                    const dadosTurno = filteredData.filter(r => {
-                        const nLoja = String(r['N LOJA'] || '').trim();
-                        if (!nLoja) return false;
-                        const lojaNum = parseInt(nLoja, 10);
-                        if (isNaN(lojaNum)) return false;
-                        return turnoPorLoja[lojaNum] === turno;
-                    });
-                    
-                    const chamadosUnicos = new Set(dadosTurno.map(r => String(r[colChamado] || '')).filter(Boolean));
-                    const totalChamados = chamadosUnicos.size;
-                    
-                    const autorizados = dadosTurno.filter(r => String(r[colStatus] || '').trim() === 'Autorizado');
-                    const chamadosAutorizadosUnicos = new Set(autorizados.map(r => String(r[colChamado] || '')).filter(Boolean));
-                    const autorizadosCount = chamadosAutorizadosUnicos.size;
-                    
-                    const valorTotal = dadosTurno.reduce((s, r) => s + (typeof r[colVal] === 'number' ? r[colVal] : 0), 0);
-                    const valorAutorizado = autorizados.reduce((s, r) => s + (typeof r[colVal] === 'number' ? r[colVal] : 0), 0);
-                    const percentValor = valorTotal > 0 ? (valorAutorizado / valorTotal * 100) : 0;
-                    
-                    return {
-                        turno,
-                        totalChamados,
-                        autorizadosCount,
-                        valorTotal,
-                        valorAutorizado,
-                        percentValor: Math.round(percentValor * 10) / 10
-                    };
+                if (!colVal) return [];
+                const map = {};
+                getDadosColaboradoresFiltrados().forEach(row => {
+                    const produtivo = String(row['PRODUTIVO'] || '').trim();
+                    if (!produtivo) return;
+                    if (!map[produtivo]) map[produtivo] = { produtivo, cargas: new Set(), lotes: new Set(), total: 0 };
+                    const nCarga = String(row['NROCARGA'] || '').trim();
+                    const keyCargaLote = String(row['KEY_CARGA_LOTE'] || '').trim();
+                    const valor = typeof row[colVal] === 'number' ? row[colVal] : 0;
+                    if (nCarga) map[produtivo].cargas.add(nCarga);
+                    if (keyCargaLote) map[produtivo].lotes.add(keyCargaLote);
+                    map[produtivo].total += valor;
                 });
+                return Object.values(map).map(item => ({ produtivo: item.produtivo, qtdCargas: item.cargas.size, qtdLotes: item.lotes.size, total: item.total })).sort((a, b) => b.total - a.total);
+            }
 
-                const columns = ['Turno', 'Total Chamados', 'Chamados Autorizados', 'Valor Total (R$)', 'Valor Autorizado (R$)', '% Autorizado (Valor)'];
-                const rows = stats.map(s => [s.turno, s.totalChamados, s.autorizadosCount, s.valorTotal, s.valorAutorizado, s.percentValor.toFixed(1) + '%']);
-                const formatters = [null, formatNumber, formatNumber, formatCurrency, formatCurrency, null];
-                renderTable('aprovTableWrapper', columns, rows, { sortable: true, colFormatters: formatters, dblClickCol: 'turno_export' });
-
-                // Ajustar data-valor para o turno
-                const tbody = document.querySelector('#aprovTableWrapper tbody');
-                if (tbody) {
-                    const trs = tbody.querySelectorAll('tr');
-                    trs.forEach(tr => {
-                        tr.dataset.coluna = 'turno_export';
-                        const turno = tr.querySelector('td').textContent.trim();
-                        tr.dataset.valor = turno;
-                    });
+            function renderColaboradoresOfensores() {
+                const agg = aggregateColaboradoresOfensores();
+                renderTable('colaboradoresTableWrapper', ['PRODUTIVO', 'CARGAS DIVERGENTES', 'LOTES DIVERGENTES', 'R$ DIVERGENTE'], agg.map(r => [r.produtivo, r.qtdCargas, r.qtdLotes, r.total]), { colFormatters: [null, formatNumber, formatNumber, formatCurrency] });
+                if (agg.length) {
+                    const top = agg.slice(0, 10);
+                    renderBarChart('chartColaboradores', top.map(r => r.produtivo.substring(0,15)), [{ label: 'Valor Total', data: top.map(r => r.total), backgroundColor: '#dc2626' }], 'Top 10 Ofensores', { datalabelFormatter: v => formatK(v), tooltipLabelFormatter: v => formatK(v) });
                 }
+            }
 
-                if (stats.length > 0) {
-                    const labels = stats.map(s => s.turno);
-                    const datasets = [
-                        {
-                            label: 'Total de Chamados',
-                            data: stats.map(s => s.totalChamados),
-                            backgroundColor: '#3b82f6',
-                            borderRadius: 6,
-                        },
-                        {
-                            label: 'Chamados Autorizados',
-                            data: stats.map(s => s.autorizadosCount),
-                            backgroundColor: '#dc2626',
-                            borderRadius: 6,
-                        }
-                    ];
-                    // Gráfico com números normais (sem R$)
-                    renderBarChart('chartAprovacao', labels, datasets, 'Índice de Aprovação por Turno', {
-                        datalabelFormatter: (v) => formatNumber(v),
-                        tooltipLabelFormatter: (v) => formatNumber(v)
-                    });
-                }
-
-                // Configurar duplo clique para exportar dados do turno
-                const container = document.getElementById('aprovTableWrapper');
-                if (container) {
-                    container.addEventListener('dblclick', function(e) {
-                        if (e.target.tagName === 'TH') {
-                            exportToCSV(filteredData, 'aprovacao_all.csv');
-                            toast(`📥 ${filteredData.length} registro(s) exportado(s)!`);
-                            return;
-                        }
-                        const tr = e.target.closest('tr');
-                        if (!tr) return;
-                        const turno = tr.dataset.valor;
-                        if (!turno) return;
-                        const dados = filteredData.filter(r => {
-                            const nLoja = String(r['N LOJA'] || '').trim();
-                            if (!nLoja) return false;
-                            const lojaNum = parseInt(nLoja, 10);
-                            if (isNaN(lojaNum)) return false;
-                            return turnoPorLoja[lojaNum] === turno;
-                        });
-                        if (dados.length > 0) {
-                            exportToCSV(dados, `aprovacao_${turno.replace(' ', '_')}.csv`);
-                            toast(`📥 ${dados.length} registro(s) exportado(s)!`);
-                        } else {
-                            toast('⚠️ Nenhum dado para exportar.', 'warning');
-                        }
-                    });
+            function renderAprovacao() {
+                const turnos = ['1º Turno','2º Turno','3º Turno'], colChamado = getCol('caseTask'), colStatus = getCol('status'), colVal = getCol('valorDivergencia');
+                if (!colChamado||!colStatus||!colVal) return;
+                const stats = turnos.map(turno => {
+                    const dados = filteredData.filter(r => turnoPorLoja[parseInt(r['N LOJA'],10)] === turno);
+                    const chamados = new Set(dados.map(r=>String(r[colChamado]||'')).filter(Boolean));
+                    const autorizados = dados.filter(r=>String(r[colStatus]||'').trim()==='Autorizado');
+                    const autSet = new Set(autorizados.map(r=>String(r[colChamado]||'')).filter(Boolean));
+                    const vTotal = dados.reduce((s,r)=>s+(r[colVal]||0),0);
+                    const vAut = autorizados.reduce((s,r)=>s+(r[colVal]||0),0);
+                    return { turno, total: chamados.size, autorizados: autSet.size, valorTotal: vTotal, valorAutorizado: vAut, perc: vTotal>0?(vAut/vTotal*100):0 };
+                });
+                renderTable('aprovTableWrapper', ['Turno','Total Chamados','Chamados Autorizados','Valor Total (R$)','Valor Autorizado (R$)','% Autorizado (Valor)'], stats.map(s=>[s.turno,s.total,s.autorizados,s.valorTotal,s.valorAutorizado,s.perc.toFixed(1)+'%']), { colFormatters: [null,formatNumber,formatNumber,formatCurrency,formatCurrency,null] });
+                if (stats.length) {
+                    renderBarChart('chartAprovacao', stats.map(s=>s.turno), [
+                        { label: 'Total de Chamados', data: stats.map(s=>s.total), backgroundColor: '#3b82f6' },
+                        { label: 'Chamados Autorizados', data: stats.map(s=>s.autorizados), backgroundColor: '#dc2626' }
+                    ], 'Índice de Aprovação por Turno');
                 }
             }
 
