@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HelpVision 🔍 V1.1</title>
+    <title>HelpVision 🔍 V1.7</title>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- Papa Parse -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -11,22 +14,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Chart.js DataLabels Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-
-    <!-- Dados complementares (gerado pelo processador) -->
-    <script>
-        (function() {
-            const isGitHub = window.location.hostname.includes('github.io');
-            const script = document.createElement('script');
-            if (isGitHub) {
-                script.src = 'dados.js'; 
-                console.log('Ambiente GitHub Pages detectado. Carregando dados.js direto...');
-            } else {
-                script.src = 'dados.js';
-                console.log('Ambiente Local detectado.');
-            }
-            document.head.appendChild(script);
-        })();
-    </script>
 
     <style>
         :root {
@@ -146,7 +133,6 @@
         .filter-group label { font-weight: 700; font-size: 0.85rem; color: var(--text); white-space: nowrap; }
         .filter-group select, .filter-group input { padding: 8px 14px; border: 2px solid var(--border); border-radius: 20px; font-size: 0.85rem; background: var(--card-bg); color: var(--text); cursor: pointer; font-weight: 500; transition: all var(--transition); min-width: 150px; }
         
-        /* Estilo para multiselect simulado */
         .multiselect-container { position: relative; min-width: 180px; }
         .multiselect-selected { 
             padding: 8px 14px; border: 2px solid var(--border); border-radius: 20px; 
@@ -235,7 +221,7 @@
     <header class="app-header">
         <div class="title-row">
             <span style="font-size:1.5rem;">📦</span>
-            <h1>HelpVision 🔍 <span style="font-size:0.85rem; font-weight:500; color:var(--text-secondary);">V1.0</span></h1>
+            <h1>HelpVision 🔍 <span style="font-size:0.85rem; font-weight:500; color:var(--text-secondary);">V1.2</span></h1>
             <span class="badge">Logística & Expedição</span>
             <button class="theme-toggle" id="themeToggle" title="Alternar modo escuro/claro">🌙</button>
         </div>
@@ -490,6 +476,12 @@
         (function() {
             Chart.register(ChartDataLabels);
 
+            // Configurações do Supabase
+            const SUPABASE_URL = 'https://uvmrjjnlqpnrajmuikcz.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2bXJqam5scXBucmFqbXVpa2N6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjYxNzIsImV4cCI6MjA5Nzc0MjE3Mn0.KU2eRYiaRIaGgLaV2qeAX9If2e-oHO3UTZErz4n_Vs4';
+            const ENRIQ_TABLE = 'BD';  // nome da tabela de enriquecimento
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
             let allData = [];
             let headers = [];
             let filteredData = [];
@@ -652,17 +644,48 @@
                 fileInput.value = '';
             });
 
-            function handleFile(file) {
+            // Função que busca os dados de enriquecimento do Supabase
+            async function fetchEnriquecimento() {
+                let allRows = [];
+                let rangeStart = 0;
+                const pageSize = 1000;
+                let fetchMore = true;
+
+                while (fetchMore) {
+                    const { data, error } = await supabase
+                        .from(ENRIQ_TABLE)
+                        .select('*')
+                        .range(rangeStart, rangeStart + pageSize - 1);
+                    
+                    if (error) {
+                        toast('Erro ao buscar enriquecimento: ' + error.message, 'error');
+                        console.error(error);
+                        return [];
+                    }
+                    if (data && data.length) {
+                        allRows = allRows.concat(data);
+                        rangeStart += pageSize;
+                        if (data.length < pageSize) fetchMore = false;
+                    } else {
+                        fetchMore = false;
+                    }
+                }
+                return allRows;
+            }
+
+            // Processamento do CSV com enriquecimento do Supabase
+            async function handleFile(file) {
                 if (!file) return;
                 const ext = file.name.split('.').pop().toLowerCase();
                 if (!['csv', 'tsv', 'txt'].includes(ext)) return toast('⚠️ Selecione um arquivo CSV válido.', 'error');
-                toast('⏳ Processando...', 'success');
+                toast('⏳ Processando CSV...', 'success');
+                
                 Papa.parse(file, {
                     header: true,
                     dynamicTyping: false,
                     skipEmptyLines: true,
                     encoding: 'Windows-1252',
-                    complete: function(res) {
+                    complete: async function(res) {
                         if (!res.data || res.data.length === 0) return toast('Arquivo vazio.', 'error');
                         allData = res.data.filter(r => Object.values(r).some(v => v !== null && v !== undefined && v !== ''));
                         headers = res.meta.fields || [];
@@ -705,6 +728,10 @@
                             }
                         });
 
+                        // Busca enriquecimento do Supabase
+                        toast('🔎 Buscando enriquecimento no Supabase...', 'success');
+                        const DADOS_TXTS = await fetchEnriquecimento();
+
                         const novasColunas = [
                             'DTAHORINITAREFA', 'HR INI', 'DTAHORFIMTAREFA', 'HR FIM',
                             'DTAHORFATURAMENTO', 'HR FAT', 'STATUS_TXT', 'NROCARGA',
@@ -714,7 +741,7 @@
                         headers.push(...novasColunas);
 
                         let matchCount = 0;
-                        if (typeof DADOS_TXTS !== 'undefined' && DADOS_TXTS.length > 0) {
+                        if (DADOS_TXTS.length > 0) {
                             const mapaTxt = new Map();
                             DADOS_TXTS.forEach(txtRow => {
                                 const chave = String(txtRow['KEY_CARGA_LOTE'] || '').trim();
@@ -734,6 +761,9 @@
                                 }
                             });
                             toast(`✅ ${matchCount} registros complementares carregados.`);
+                        } else {
+                            allData.forEach(row => novasColunas.forEach(col => row[col] = ''));
+                            toast('⚠️ Nenhum dado de enriquecimento encontrado no Supabase.', 'warning');
                         }
 
                         const statusSet = new Set();
@@ -757,7 +787,7 @@
                         resetTabs();
                         applyAllFilters();
                         renderAll();
-                        toast('✅ Carregado!', 'success');
+                        toast('✅ Dashboard pronto!', 'success');
                     },
                     error: () => toast('Erro ao ler o arquivo.', 'error')
                 });
@@ -1317,7 +1347,7 @@
                 }
             }
 
-            console.log('📦 HelpVision V1.0 pronto. Créditos: Pablo Martins Lopes.');
+            console.log('📦 HelpVision V1.2 pronto. Enriquecimento via Supabase.');
         })();
     </script>
 </body>
