@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HelpVision 🔍 V1.7</title>
+    <title>HelpVision 🔍 V1.8</title>
 
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <!-- Papa Parse -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <!-- Chart.js -->
@@ -215,13 +214,48 @@
 
         .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
         .empty-state .empty-icon { font-size: 3.5rem; display: block; margin-bottom: 10px; opacity: 0.6; }
+
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 10000;
+            transition: opacity 0.3s ease;
+        }
+        .spinner {
+            width: 64px;
+            height: 64px;
+            border: 6px solid rgba(255,255,255,0.15);
+            border-top: 6px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #loadingMessage {
+            color: #fff;
+            margin-top: 24px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-align: center;
+            max-width: 80%;
+        }
     </style>
 </head>
 <body>
     <header class="app-header">
         <div class="title-row">
             <span style="font-size:1.5rem;">📦</span>
-            <h1>HelpVision 🔍 <span style="font-size:0.85rem; font-weight:500; color:var(--text-secondary);">V1.7</span></h1>
+            <h1>HelpVision 🔍 <span style="font-size:0.85rem; font-weight:500; color:var(--text-secondary);">V1.8</span></h1>
             <span class="badge">Logística & Expedição</span>
             <button class="theme-toggle" id="themeToggle" title="Alternar modo escuro/claro">🌙</button>
         </div>
@@ -243,6 +277,8 @@
                 <span class="fi-item">📋 Colunas: <span class="fi-value" id="colCount">0</span></span>
                 <span class="fi-item">📝 Linhas: <span class="fi-value" id="rowCount">0</span></span>
                 <span class="fi-item">💰 Total: <span class="fi-value" id="totalDiv">R$ 0,00</span></span>
+                <span class="fi-item">📦 Peso CSV: <span class="fi-value" id="csvSize">—</span></span>
+                <span class="fi-item">☁️ Peso Supabase: <span class="fi-value" id="supabaseSize">—</span></span>
             </div>
         </div>
 
@@ -265,7 +301,7 @@
                     </div>
                 </div>
                 <div class="filter-group">
-                    <label>🕒 Turno:</label>
+                    <label>🕒 TURNO ATENDIDO:</label>
                     <div class="multiselect-container" id="turnoFilterContainer">
                         <div class="multiselect-selected"><span>Selecionar...</span> ▾</div>
                         <div class="multiselect-options" id="turnoOptions">
@@ -291,6 +327,12 @@
                         <option value="month">Mês inteiro</option>
                     </select>
                     <span id="dateInputs" style="display: flex; gap: 6px; align-items: center;"></span>
+                </div>
+                <div class="filter-group">
+                    <label>📦 TIPO DE LOTE:</label>
+                    <select id="pltFechadoFilter">
+                        <option value="Todos">📌 Todos</option>
+                    </select>
                 </div>
                 <div class="search-intelligent">
                     <label style="font-weight: 700; font-size: 0.85rem;">🔎 Buscar loja:</label>
@@ -429,14 +471,6 @@
                         <div class="header-left">🔍 Filtrar Colaboradores Ofensores</div>
                     </div>
                     <div class="filter-bar">
-                        <div class="filter-group">
-                            <label for="pltFechadoFilter">📦 PLTFECHADO:</label>
-                            <select id="pltFechadoFilter">
-                                <option value="Todos">📌 Todos</option>
-                                <option value="S">Sim (S)</option>
-                                <option value="N">Não (N)</option>
-                            </select>
-                        </div>
                         <div class="search-intelligent">
                             <label style="font-weight: 700; font-size: 0.85rem;">👤 Buscar Colaborador:</label>
                             <input type="text" id="colaboradorSearch" placeholder="Matrícula ou Nome..." autocomplete="off">
@@ -472,14 +506,18 @@
         </div>
     </div>
 
+    <div id="loadingOverlay" style="display:none;">
+        <div class="spinner"></div>
+        <p id="loadingMessage">Carregando Servidor, Por favor Aguarde...😉</p>
+    </div>
+
     <script>
         (function() {
             Chart.register(ChartDataLabels);
 
-            // Configurações do Supabase
             const SUPABASE_URL = 'https://uvmrjjnlqpnrajmuikcz.supabase.co';
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2bXJqam5scXBucmFqbXVpa2N6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjYxNzIsImV4cCI6MjA5Nzc0MjE3Mn0.KU2eRYiaRIaGgLaV2qeAX9If2e-oHO3UTZErz4n_Vs4';
-            const ENRIQ_TABLE = 'BD';  // nome da tabela de enriquecimento
+            const ENRIQ_TABLE = 'BD';
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
             let allData = [];
@@ -489,6 +527,7 @@
             let tipoValues = [];
             let idx = {};
             let charts = {};
+            let idxPltFechado = -1; // índice da coluna 'PLTFECHADO'
 
             let allPage = 1;
             const allPerPage = 50;
@@ -591,6 +630,14 @@
                 return idx !== -1 ? str.substring(idx + 2).trim() : '';
             }
 
+            function formatBytes(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            }
+
             function exportToCSV(dataArray, filename = 'exportacao.csv') {
                 const csv = Papa.unparse(dataArray, { delimiter: ";", header: true });
                 const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -644,7 +691,6 @@
                 fileInput.value = '';
             });
 
-            // Função que busca os dados de enriquecimento do Supabase
             async function fetchEnriquecimento() {
                 let allRows = [];
                 let rangeStart = 0;
@@ -673,12 +719,15 @@
                 return allRows;
             }
 
-            // Processamento do CSV com enriquecimento do Supabase
             async function handleFile(file) {
                 if (!file) return;
                 const ext = file.name.split('.').pop().toLowerCase();
                 if (!['csv', 'tsv', 'txt'].includes(ext)) return toast('⚠️ Selecione um arquivo CSV válido.', 'error');
-                toast('⏳ Processando CSV...', 'success');
+                
+                const overlay = document.getElementById('loadingOverlay');
+                const msg = document.getElementById('loadingMessage');
+                overlay.style.display = 'flex';
+                msg.textContent = 'Carregando Servidor, Por favor Aguarde...😉';
                 
                 Papa.parse(file, {
                     header: true,
@@ -686,110 +735,151 @@
                     skipEmptyLines: true,
                     encoding: 'Windows-1252',
                     complete: async function(res) {
-                        if (!res.data || res.data.length === 0) return toast('Arquivo vazio.', 'error');
-                        allData = res.data.filter(r => Object.values(r).some(v => v !== null && v !== undefined && v !== ''));
-                        headers = res.meta.fields || [];
-                        if (headers.length === 0) return toast('Sem colunas.', 'error');
-
-                        headers.push('N LOJA');
-                        headers.push('KEY MÊS');
-                        headers.push('KEY_CARGA_LOTE');
-
-                        mapColumns();
-                        const statusCol = getCol('status');
-                        const tipoCol = getCol('tipoDivergencia');
-                        const valorCol = getCol('valorDivergencia');
-                        const dataCol = getCol('abertoEm');
-                        const lojaCol = getCol('lojaDestino');
-                        const numCargaCol = getCol('numeroCarga');
-                        const loteCol = getCol('lote');
-
-                        allData.forEach(row => {
-                            if (lojaCol) row['N LOJA'] = extrairNLoja(row[lojaCol]); else row['N LOJA'] = '';
-                            if (dataCol) {
-                                const d = parseDate(row[dataCol]);
-                                row['_dataObj'] = d;
-                                row['KEY MÊS'] = d ? gerarKeyMes(d) : '';
-                            } else { row['_dataObj'] = null; row['KEY MÊS'] = ''; }
-                            if (numCargaCol && loteCol) {
-                                row['KEY_CARGA_LOTE'] = String(row[numCargaCol] || '').trim() + '_' + String(row[loteCol] || '').trim();
-                            } else { row['KEY_CARGA_LOTE'] = ''; }
-                            if (statusCol) {
-                                let val = row[statusCol];
-                                row[statusCol] = (!val || String(val).trim() === '') ? 'Em Aberto' : String(val).trim();
+                        try {
+                            if (!res.data || res.data.length === 0) {
+                                overlay.style.display = 'none';
+                                return toast('Arquivo vazio.', 'error');
                             }
-                            if (tipoCol) {
-                                let val = row[tipoCol];
-                                row[tipoCol] = (!val || String(val).trim() === '') ? 'Não informado' : String(val).trim();
+                            allData = res.data.filter(r => Object.values(r).some(v => v !== null && v !== undefined && v !== ''));
+                            headers = res.meta.fields || [];
+                            if (headers.length === 0) {
+                                overlay.style.display = 'none';
+                                return toast('Sem colunas.', 'error');
                             }
-                            if (valorCol && row[valorCol] !== null && row[valorCol] !== undefined) {
-                                const converted = parseBrazilianNumber(String(row[valorCol]));
-                                row[valorCol] = isNaN(converted) ? 0 : converted;
-                            }
-                        });
 
-                        // Busca enriquecimento do Supabase
-                        toast('🔎 Buscando enriquecimento no Supabase...', 'success');
-                        const DADOS_TXTS = await fetchEnriquecimento();
+                            headers.push('N LOJA');
+                            headers.push('KEY MÊS');
+                            headers.push('KEY_CARGA_LOTE');
 
-                        const novasColunas = [
-                            'DTAHORINITAREFA', 'HR INI', 'DTAHORFIMTAREFA', 'HR FIM',
-                            'DTAHORFATURAMENTO', 'HR FAT', 'STATUS_TXT', 'NROCARGA',
-                            'SEQLOTE', 'PLTFECHADO', 'CODPRODUTIVO', 'PRODUTIVO',
-                            'TURNO_INI', 'TURNO_FIM', 'TURNO_FAT'
-                        ];
-                        headers.push(...novasColunas);
+                            mapColumns();
 
-                        let matchCount = 0;
-                        if (DADOS_TXTS.length > 0) {
-                            const mapaTxt = new Map();
-                            DADOS_TXTS.forEach(txtRow => {
-                                const chave = String(txtRow['KEY_CARGA_LOTE'] || '').trim();
-                                if (chave) mapaTxt.set(chave, txtRow);
-                            });
+                            const statusCol = getCol('status');
+                            const tipoCol = getCol('tipoDivergencia');
+                            const valorCol = getCol('valorDivergencia');
+                            const dataCol = getCol('abertoEm');
+                            const lojaCol = getCol('lojaDestino');
+                            const numCargaCol = getCol('numeroCarga');
+                            const loteCol = getCol('lote');
+
                             allData.forEach(row => {
-                                const chave = String(row['KEY_CARGA_LOTE'] || '').trim();
-                                const match = mapaTxt.get(chave);
-                                if (match) {
-                                    novasColunas.forEach(col => {
-                                        const campoOrigem = col === 'STATUS_TXT' ? 'STATUS' : col;
-                                        row[col] = match[campoOrigem] !== undefined ? match[campoOrigem] : '';
-                                    });
-                                    matchCount++;
-                                } else {
-                                    novasColunas.forEach(col => { row[col] = ''; });
+                                if (lojaCol) row['N LOJA'] = extrairNLoja(row[lojaCol]); else row['N LOJA'] = '';
+                                if (dataCol) {
+                                    const d = parseDate(row[dataCol]);
+                                    row['_dataObj'] = d;
+                                    row['KEY MÊS'] = d ? gerarKeyMes(d) : '';
+                                } else { row['_dataObj'] = null; row['KEY MÊS'] = ''; }
+                                if (numCargaCol && loteCol) {
+                                    row['KEY_CARGA_LOTE'] = String(row[numCargaCol] || '').trim() + '_' + String(row[loteCol] || '').trim();
+                                } else { row['KEY_CARGA_LOTE'] = ''; }
+                                if (statusCol) {
+                                    let val = row[statusCol];
+                                    row[statusCol] = (!val || String(val).trim() === '') ? 'Em Aberto' : String(val).trim();
+                                }
+                                if (tipoCol) {
+                                    let val = row[tipoCol];
+                                    row[tipoCol] = (!val || String(val).trim() === '') ? 'Não informado' : String(val).trim();
+                                }
+                                if (valorCol && row[valorCol] !== null && row[valorCol] !== undefined) {
+                                    const converted = parseBrazilianNumber(String(row[valorCol]));
+                                    row[valorCol] = isNaN(converted) ? 0 : converted;
                                 }
                             });
-                            toast(`✅ ${matchCount} registros complementares carregados.`);
-                        } else {
-                            allData.forEach(row => novasColunas.forEach(col => row[col] = ''));
-                            toast('⚠️ Nenhum dado de enriquecimento encontrado no Supabase.', 'warning');
+
+                            const DADOS_TXTS = await fetchEnriquecimento();
+
+                            const novasColunas = [
+                                'DTAHORINITAREFA', 'HR INI', 'DTAHORFIMTAREFA', 'HR FIM',
+                                'DTAHORFATURAMENTO', 'HR FAT', 'STATUS_TXT', 'NROCARGA',
+                                'SEQLOTE', 'PLTFECHADO', 'CODPRODUTIVO', 'PRODUTIVO',
+                                'TURNO_INI', 'TURNO_FIM', 'TURNO_FAT'
+                            ];
+                            headers.push(...novasColunas);
+
+                            // Índice da coluna PLTFECHADO (enriquecida)
+                            idxPltFechado = headers.indexOf('PLTFECHADO');
+
+                            let matchCount = 0;
+                            if (DADOS_TXTS.length > 0) {
+                                const mapaTxt = new Map();
+                                DADOS_TXTS.forEach(txtRow => {
+                                    const chave = String(txtRow['KEY_CARGA_LOTE'] || '').trim();
+                                    if (chave) mapaTxt.set(chave, txtRow);
+                                });
+                                allData.forEach(row => {
+                                    const chave = String(row['KEY_CARGA_LOTE'] || '').trim();
+                                    const match = mapaTxt.get(chave);
+                                    if (match) {
+                                        novasColunas.forEach(col => {
+                                            const campoOrigem = col === 'STATUS_TXT' ? 'STATUS' : col;
+                                            row[col] = match[campoOrigem] !== undefined ? match[campoOrigem] : '';
+                                        });
+                                        matchCount++;
+                                    } else {
+                                        novasColunas.forEach(col => { row[col] = ''; });
+                                    }
+                                });
+                                toast(`✅ ${matchCount} registros complementares carregados.`);
+                            } else {
+                                allData.forEach(row => novasColunas.forEach(col => row[col] = ''));
+                                toast('⚠️ Nenhum dado de enriquecimento encontrado no Supabase.', 'warning');
+                            }
+
+                            allData.forEach(row => {
+                                ['CODPRODUTIVO', 'NROCARGA'].forEach(col => {
+                                    if (row[col] !== undefined && row[col] !== '' && row[col] !== null) {
+                                        const num = parseFloat(String(row[col]).replace(',', '.'));
+                                        if (!isNaN(num)) row[col] = String(Math.round(num));
+                                    }
+                                });
+                            });
+
+                            const statusSet = new Set();
+                            const tipoSet = new Set();
+                            const pltValuesSet = new Set();
+                            allData.forEach(r => { 
+                                if (statusCol) statusSet.add(r[statusCol]); 
+                                if (tipoCol) tipoSet.add(r[tipoCol]);
+                                if (idxPltFechado >= 0) {
+                                    const val = String(r[headers[idxPltFechado]] || '').trim();
+                                    if (val) pltValuesSet.add(val);
+                                }
+                            });
+                            statusValues = Array.from(statusSet).sort();
+                            tipoValues = Array.from(tipoSet).sort();
+                            populatePltFilter(Array.from(pltValuesSet).sort());
+                            populateFilters();
+                            populateDateMode();
+                            setupSmartSearch();
+                            setupColaboradorSearch();
+                            setupCameraButtons();
+
+                            document.getElementById('fileName').textContent = file.name;
+                            document.getElementById('colCount').textContent = headers.length;
+                            document.getElementById('rowCount').textContent = allData.length.toLocaleString('pt-BR');
+                            document.getElementById('csvSize').textContent = formatBytes(file.size);
+                            const totalDiv = computeTotalDivergencia(allData);
+                            document.getElementById('totalDiv').textContent = formatCurrency(totalDiv);
+                            const supabaseSizeBytes = new Blob([JSON.stringify(DADOS_TXTS)]).size;
+                            document.getElementById('supabaseSize').textContent = formatBytes(supabaseSizeBytes);
+                            document.getElementById('fileInfo').style.display = 'flex';
+                            document.getElementById('mainContent').style.display = 'block';
+                            document.getElementById('noDataMessage').style.display = 'none';
+                            resetTabs();
+                            applyAllFilters();
+                            renderAll();
+                            
+                            overlay.style.display = 'none';
+                            toast('✅ Dashboard pronto!', 'success');
+                        } catch (err) {
+                            overlay.style.display = 'none';
+                            toast('Erro inesperado ao processar arquivo.', 'error');
+                            console.error(err);
                         }
-
-                        const statusSet = new Set();
-                        const tipoSet = new Set();
-                        allData.forEach(r => { if (statusCol) statusSet.add(r[statusCol]); if (tipoCol) tipoSet.add(r[tipoCol]); });
-                        statusValues = Array.from(statusSet).sort();
-                        tipoValues = Array.from(tipoSet).sort();
-                        populateFilters();
-                        populateDateMode();
-                        setupSmartSearch();
-                        setupColaboradorSearch();
-
-                        document.getElementById('fileName').textContent = file.name;
-                        document.getElementById('colCount').textContent = headers.length;
-                        document.getElementById('rowCount').textContent = allData.length.toLocaleString('pt-BR');
-                        const totalDiv = computeTotalDivergencia(allData);
-                        document.getElementById('totalDiv').textContent = formatCurrency(totalDiv);
-                        document.getElementById('fileInfo').style.display = 'flex';
-                        document.getElementById('mainContent').style.display = 'block';
-                        document.getElementById('noDataMessage').style.display = 'none';
-                        resetTabs();
-                        applyAllFilters();
-                        renderAll();
-                        toast('✅ Dashboard pronto!', 'success');
                     },
-                    error: () => toast('Erro ao ler o arquivo.', 'error')
+                    error: () => {
+                        overlay.style.display = 'none';
+                        toast('Erro ao ler o arquivo.', 'error');
+                    }
                 });
             }
 
@@ -957,14 +1047,21 @@
                 return checked.length > 0 ? checked : null;
             }
 
+            function populatePltFilter(values) {
+                const select = document.getElementById('pltFechadoFilter');
+                select.innerHTML = '<option value="Todos">📌 Todos</option>';
+                values.forEach(v => {
+                    select.innerHTML += `<option value="${v}">${v}</option>`;
+                });
+                select.onchange = () => { applyAllFilters(); renderAll(); };
+            }
+
             function populateFilters() {
                 createMultiselect('statusFilterContainer', 'statusOptions', statusValues, () => { applyAllFilters(); renderAll(); });
                 createMultiselect('tipoFilterContainer', 'tipoOptions', tipoValues, () => { applyAllFilters(); renderAll(); });
                 createMultiselect('turnoFilterContainer', 'turnoOptions', ['1º Turno', '2º Turno', '3º Turno'], () => { applyAllFilters(); renderAll(); });
                 const turnoProduzidoValues = [...new Set(allData.map(r => String(r['TURNO_INI'] || '').trim()).filter(Boolean))].sort();
                 createMultiselect('turnoProduzidoFilterContainer', 'turnoProduzidoOptions', turnoProduzidoValues, () => { applyAllFilters(); renderAll(); });
-
-                document.getElementById('pltFechadoFilter').onchange = () => renderColaboradoresOfensores();
                 document.addEventListener('click', () => document.querySelectorAll('.multiselect-container').forEach(c => c.classList.remove('active')));
             }
 
@@ -973,6 +1070,7 @@
                 const selTipo = getMultiselectValues('tipoOptions');
                 const selTurno = getMultiselectValues('turnoOptions');
                 const selTurnoProduzido = getMultiselectValues('turnoProduzidoOptions');
+                const pltFechado = document.getElementById('pltFechadoFilter')?.value || 'Todos';
                 
                 const dateFilterFn = getDateFilterFn();
                 filteredData = allData.filter(dateFilterFn);
@@ -994,6 +1092,10 @@
                 }
                 if (selTurnoProduzido) {
                     filteredData = filteredData.filter(r => selTurnoProduzido.includes(String(r['TURNO_INI'] || '').trim()));
+                }
+                if (pltFechado !== 'Todos' && idxPltFechado >= 0) {
+                    const colPlt = headers[idxPltFechado];
+                    filteredData = filteredData.filter(r => String(r[colPlt] || '').trim() === pltFechado);
                 }
                 if (smartSearchValue) {
                     const isNumeric = /^\d+$/.test(smartSearchValue);
@@ -1286,9 +1388,7 @@
             }
 
             function getDadosColaboradoresFiltrados() {
-                const filtroPlt = document.getElementById('pltFechadoFilter')?.value || 'Todos';
                 let data = filteredData.filter(r => String(r['PRODUTIVO'] || '').trim() !== '');
-                if (filtroPlt !== 'Todos') data = data.filter(r => String(r['PLTFECHADO'] || '').trim() === filtroPlt);
                 const termoBusca = String(colaboradorSearchValue || '').trim();
                 if (termoBusca) {
                     const matriculaBusca = (termoBusca.match(/\d+/) || [''])[0];
@@ -1306,7 +1406,15 @@
                 getDadosColaboradoresFiltrados().forEach(row => {
                     const produtivo = String(row['PRODUTIVO'] || '').trim();
                     if (!produtivo) return;
-                    if (!map[produtivo]) map[produtivo] = { produtivo, cargas: new Set(), lotes: new Set(), total: 0 };
+                    if (!map[produtivo]) {
+                        map[produtivo] = { 
+                            produtivo, 
+                            turnoIni: String(row['TURNO_INI'] || '').trim(),
+                            cargas: new Set(), 
+                            lotes: new Set(), 
+                            total: 0 
+                        };
+                    }
                     const nCarga = String(row['NROCARGA'] || '').trim();
                     const keyCargaLote = String(row['KEY_CARGA_LOTE'] || '').trim();
                     const valor = typeof row[colVal] === 'number' ? row[colVal] : 0;
@@ -1314,12 +1422,21 @@
                     if (keyCargaLote) map[produtivo].lotes.add(keyCargaLote);
                     map[produtivo].total += valor;
                 });
-                return Object.values(map).map(item => ({ produtivo: item.produtivo, qtdCargas: item.cargas.size, qtdLotes: item.lotes.size, total: item.total })).sort((a, b) => b.total - a.total);
+                return Object.values(map).map(item => ({ 
+                    produtivo: item.produtivo, 
+                    turnoIni: item.turnoIni,
+                    qtdCargas: item.cargas.size, 
+                    qtdLotes: item.lotes.size, 
+                    total: item.total 
+                })).sort((a, b) => b.total - a.total);
             }
 
             function renderColaboradoresOfensores() {
                 const agg = aggregateColaboradoresOfensores();
-                renderTable('colaboradoresTableWrapper', ['PRODUTIVO', 'CARGAS DIVERGENTES', 'LOTES DIVERGENTES', 'R$ DIVERGENTE'], agg.map(r => [r.produtivo, r.qtdCargas, r.qtdLotes, r.total]), { colFormatters: [null, formatNumber, formatNumber, formatCurrency] });
+                const colunas = ['PRODUTIVO', 'TURNO INI', 'CARGAS DIVERGENTES', 'LOTES DIVERGENTES', 'R$ DIVERGENTE'];
+                const dados = agg.map(r => [r.produtivo, r.turnoIni, r.qtdCargas, r.qtdLotes, r.total]);
+                const formatadores = [null, null, formatNumber, formatNumber, formatCurrency];
+                renderTable('colaboradoresTableWrapper', colunas, dados, { colFormatters: formatadores });
                 if (agg.length) {
                     const top = agg.slice(0, 10);
                     renderBarChart('chartColaboradores', top.map(r => r.produtivo.substring(0,15)), [{ label: 'Valor Total', data: top.map(r => r.total), backgroundColor: '#dc2626' }], 'Top 10 Ofensores', { datalabelFormatter: v => formatK(v), tooltipLabelFormatter: v => formatK(v) });
@@ -1343,11 +1460,49 @@
                     renderBarChart('chartAprovacao', stats.map(s=>s.turno), [
                         { label: 'Total de Chamados', data: stats.map(s=>s.total), backgroundColor: '#3b82f6' },
                         { label: 'Chamados Autorizados', data: stats.map(s=>s.autorizados), backgroundColor: '#dc2626' }
-                    ], 'Índice de Aprovação por Turno');
+                    ], 'Índice de Aprovação por Turno', { 
+                        datalabelFormatter: v => Math.round(v).toString(), 
+                        tooltipLabelFormatter: v => Math.round(v).toString() 
+                    });
                 }
             }
 
-            console.log('📦 HelpVision V1.2 pronto. Enriquecimento via Supabase.');
+            window.copyTable = function(containerId) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                const table = container.querySelector('table');
+                if (!table) return;
+                const rows = table.querySelectorAll('tr');
+                const text = Array.from(rows).map(row => {
+                    const cells = row.querySelectorAll('th, td');
+                    return Array.from(cells).map(cell => cell.innerText.trim()).join('\t');
+                }).join('\n');
+                navigator.clipboard.writeText(text).then(() => {
+                    toast('📋 Tabela copiada!', 'success');
+                }).catch(() => {
+                    toast('Erro ao copiar tabela.', 'error');
+                });
+            };
+
+            function salvarGrafico(canvasId) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+                const link = document.createElement('a');
+                link.download = `${canvasId}_${new Date().toISOString().slice(0,10)}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }
+
+            function setupCameraButtons() {
+                document.getElementById('btnCameraTipo').onclick = () => salvarGrafico('chartTipo');
+                document.getElementById('btnCameraLoja').onclick = () => salvarGrafico('chartLoja');
+                document.getElementById('btnCameraItem').onclick = () => salvarGrafico('chartItem');
+                document.getElementById('btnCameraStatus').onclick = () => salvarGrafico('chartStatus');
+                document.getElementById('btnCameraAprovacao').onclick = () => salvarGrafico('chartAprovacao');
+                document.getElementById('btnCameraColaboradores').onclick = () => salvarGrafico('chartColaboradores');
+            }
+
+            console.log('📦 HelpVision V1.8 pronto. Enriquecimento via Supabase.');
         })();
     </script>
 </body>
