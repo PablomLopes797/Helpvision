@@ -3,15 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HelpVision 🔍 V1.8</title>
+    <title>HelpVision 🔍 V3.0 – Consulta BD_HELP</title>
 
-    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Papa Parse -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <!-- Chart.js DataLabels Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 
     <style>
@@ -27,8 +23,8 @@
             --danger-bg: #fef2f2;
             --warning: #f59e0b;
             --success: #10b981;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
             --radius: 12px;
             --radius-sm: 8px;
             --transition: 0.2s ease;
@@ -42,6 +38,8 @@
             --pagination-btn-bg: #fff;
             --search-bg: #fafbfc;
             --btn-icon-bg: #fff;
+            --modal-overlay: rgba(0,0,0,0.5);
+            --modal-bg: #ffffff;
         }
 
         body.dark {
@@ -56,8 +54,8 @@
             --danger-bg: #450a0a;
             --warning: #f59e0b;
             --success: #10b981;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-            --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
             --filter-bg: #1e293b;
             --table-header-bg: #1e293b;
             --table-row-even: #1e293b;
@@ -68,29 +66,20 @@
             --pagination-btn-bg: #1e293b;
             --search-bg: #1e293b;
             --btn-icon-bg: #1e293b;
+            --modal-overlay: rgba(0,0,0,0.7);
+            --modal-bg: #1e293b;
         }
 
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
+            background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh;
             transition: background var(--transition), color var(--transition);
         }
         .app-header {
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            box-shadow: var(--shadow-sm);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            transition: background var(--transition);
+            background: var(--card-bg); border-bottom: 1px solid var(--border); padding: 16px 24px;
+            display: flex; flex-direction: column; gap: 4px; box-shadow: var(--shadow-sm);
+            position: sticky; top: 0; z-index: 100; transition: background var(--transition);
         }
         .app-header .title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .app-header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.3px; color: var(--text); white-space: nowrap; }
@@ -102,6 +91,14 @@
             display: flex; align-items: center; gap: 4px; color: var(--text); background: var(--btn-icon-bg);
         }
         .theme-toggle:hover { background: var(--table-row-hover); border-color: var(--primary); }
+        .btn-update-base, .btn-link-ext {
+            background: var(--success); color: #fff; border: none; border-radius: 20px; padding: 6px 16px;
+            cursor: pointer; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;
+            transition: all var(--transition); white-space: nowrap; text-decoration: none;
+        }
+        .btn-update-base:hover, .btn-link-ext:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-link-ext { background: var(--primary); }
+        .ultima-atualizacao { font-size: 0.7rem; color: var(--text-secondary); font-weight: 500; margin-top: 2px; }
         .container { max-width: 1500px; margin: 0 auto; padding: 20px 24px; }
         .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: background var(--transition); }
         .card-header { font-weight: 700; font-size: 1.05rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; color: var(--text); justify-content: space-between; }
@@ -112,20 +109,6 @@
             display: flex; align-items: center; gap: 4px; color: var(--text); background: var(--btn-icon-bg);
         }
         .btn-icon:hover { background: var(--table-row-hover); border-color: var(--primary); color: var(--primary); }
-
-        .dropzone { border: 3px dashed var(--border); border-radius: var(--radius); padding: 40px 24px; text-align: center; cursor: pointer; transition: all var(--transition); background: var(--dropzone-bg); }
-        .dropzone:hover, .dropzone.drag-over { border-color: var(--primary); background: var(--table-row-hover); transform: translateY(-2px); box-shadow: var(--shadow); }
-        .dropzone .icon-upload { font-size: 3rem; display: block; margin-bottom: 8px; }
-        .dropzone p { font-weight: 600; color: var(--text); margin-bottom: 4px; }
-        .dropzone span { color: var(--text-secondary); font-size: 0.9rem; }
-        .dropzone input[type="file"] { display: none; }
-        .btn-select { display: inline-block; margin-top: 12px; background: var(--primary); color: #fff; padding: 10px 22px; border-radius: 25px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all var(--transition); border: none; }
-        .btn-select:hover { background: var(--primary-hover); transform: translateY(-1px); }
-
-        .file-info { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 12px 18px; background: var(--filter-bg); border-radius: var(--radius-sm); border: 1px solid var(--border); margin-top: 16px; }
-        .file-info .fi-item { font-size: 0.9rem; color: var(--text-secondary); }
-        .file-info .fi-value { font-weight: 700; color: var(--text); background: var(--card-bg); padding: 3px 10px; border-radius: 12px; border: 1px solid var(--border); }
-        .file-info .fi-name { font-weight: 600; color: var(--primary); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         .filter-bar { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; padding: 12px 20px; background: var(--filter-bg); border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 16px; }
         .filter-group { display: flex; align-items: center; gap: 8px; }
@@ -153,9 +136,6 @@
         .btn-mini { padding: 4px 10px; border-radius: 12px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all var(--transition); }
         .btn-apply { background: var(--primary); color: #fff; }
         .btn-clear { background: var(--border); color: var(--text); }
-
-        .filter-group input[type="date"] { cursor: text; }
-        .filter-group select:focus, .filter-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
         .search-intelligent { position: relative; display: flex; align-items: center; gap: 8px; }
         .search-intelligent input { padding: 8px 14px; border: 2px solid var(--border); border-radius: 20px; font-size: 0.85rem; background: var(--card-bg); color: var(--text); font-weight: 500; transition: all var(--transition); width: 280px; }
@@ -216,75 +196,35 @@
         .empty-state .empty-icon { font-size: 3.5rem; display: block; margin-bottom: 10px; opacity: 0.6; }
 
         #loadingOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            z-index: 10000;
-            transition: opacity 0.3s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            z-index: 10000; transition: opacity 0.3s ease;
         }
-        .spinner {
-            width: 64px;
-            height: 64px;
-            border: 6px solid rgba(255,255,255,0.15);
-            border-top: 6px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        #loadingMessage {
-            color: #fff;
-            margin-top: 24px;
-            font-size: 1.2rem;
-            font-weight: 500;
-            text-align: center;
-            max-width: 80%;
-        }
+        .spinner { width: 64px; height: 64px; border: 6px solid rgba(255,255,255,0.15); border-top: 6px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #loadingMessage { color: #fff; margin-top: 24px; font-size: 1.2rem; font-weight: 500; text-align: center; max-width: 80%; }
     </style>
 </head>
 <body>
     <header class="app-header">
         <div class="title-row">
             <span style="font-size:1.5rem;">📦</span>
-            <h1>HelpVision 🔍 <span style="font-size:0.85rem; font-weight:500; color:var(--text-secondary);">V1.8</span></h1>
+            <h1>HelpVision 🔍 <span style="font-size:0.85rem; font-weight:500; color:var(--text-secondary);">V3.0</span></h1>
             <span class="badge">Logística & Expedição</span>
-            <button class="theme-toggle" id="themeToggle" title="Alternar modo escuro/claro">🌙</button>
+            <button class="theme-toggle" id="themeToggle" title="Alternar modo escuro/claro">
+                <span id="themeIcon">🌙</span>
+            </button>
+            <button class="btn-icon" id="btnLoadSupabase" title="Recarregar dados do BD_HELP">☁️ Recarregar BD</button>
+            <button class="btn-link-ext" id="btnLinkExterno" title="Abrir link externo">🔗 Portal</button>
         </div>
         <span class="credit">Desenvolvido por Pablo Martins Lopes</span>
+        <span class="ultima-atualizacao" id="ultimaAtualizacao">Última atualização da base: —</span>
     </header>
 
     <div class="container">
-        <div class="card" id="uploadCard">
-            <div class="dropzone" id="dropzone">
-                <span class="icon-upload">📁</span>
-                <p>Arraste e solte seu arquivo CSV aqui</p>
-                <span>ou clique para selecionar</span>
-                <br>
-                <label class="btn-select" for="fileInput">📂 Selecionar Arquivo</label>
-                <input type="file" id="fileInput" accept=".csv,.tsv,.txt">
-            </div>
-            <div class="file-info" id="fileInfo" style="display:none;">
-                <span class="fi-item">📄 <span class="fi-name" id="fileName">—</span></span>
-                <span class="fi-item">📋 Colunas: <span class="fi-value" id="colCount">0</span></span>
-                <span class="fi-item">📝 Linhas: <span class="fi-value" id="rowCount">0</span></span>
-                <span class="fi-item">💰 Total: <span class="fi-value" id="totalDiv">R$ 0,00</span></span>
-                <span class="fi-item">📦 Peso CSV: <span class="fi-value" id="csvSize">—</span></span>
-                <span class="fi-item">☁️ Peso Supabase: <span class="fi-value" id="supabaseSize">—</span></span>
-            </div>
-        </div>
-
         <div id="mainContent" style="display:none;">
             <div class="kpi-grid" id="kpiGrid"></div>
-
             <div class="filter-bar">
                 <div class="filter-group">
                     <label>🔽 Status:</label>
@@ -298,17 +238,6 @@
                     <div class="multiselect-container" id="tipoFilterContainer">
                         <div class="multiselect-selected"><span>Selecionar...</span> ▾</div>
                         <div class="multiselect-options" id="tipoOptions"></div>
-                    </div>
-                </div>
-                <div class="filter-group">
-                    <label>🕒 TURNO ATENDIDO:</label>
-                    <div class="multiselect-container" id="turnoFilterContainer">
-                        <div class="multiselect-selected"><span>Selecionar...</span> ▾</div>
-                        <div class="multiselect-options" id="turnoOptions">
-                            <div class="multiselect-option"><input type="checkbox" value="1º Turno"> 1º Turno</div>
-                            <div class="multiselect-option"><input type="checkbox" value="2º Turno"> 2º Turno</div>
-                            <div class="multiselect-option"><input type="checkbox" value="3º Turno"> 3º Turno</div>
-                        </div>
                     </div>
                 </div>
                 <div class="filter-group">
@@ -473,7 +402,7 @@
                     <div class="filter-bar">
                         <div class="search-intelligent">
                             <label style="font-weight: 700; font-size: 0.85rem;">👤 Buscar Colaborador:</label>
-                            <input type="text" id="colaboradorSearch" placeholder="Matrícula ou Nome..." autocomplete="off">
+                            <input type="text" id="colaboradorSearch" placeholder="Nome do produtivo..." autocomplete="off">
                             <div class="suggestions-dropdown" id="colaboradorSuggestions"></div>
                         </div>
                     </div>
@@ -500,8 +429,8 @@
         <div id="noDataMessage" class="card">
             <div class="empty-state">
                 <span class="empty-icon">📂</span>
-                <p><strong>Nenhum dado carregado ainda.</strong></p>
-                <p style="color:var(--text-secondary);">Arraste um arquivo CSV para iniciar a análise.</p>
+                <p><strong>Carregando dados do BD_HELP...</strong></p>
+                <p style="color:var(--text-secondary);">Aguarde enquanto os dados são obtidos do Supabase.</p>
             </div>
         </div>
     </div>
@@ -517,8 +446,10 @@
 
             const SUPABASE_URL = 'https://uvmrjjnlqpnrajmuikcz.supabase.co';
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2bXJqam5scXBucmFqbXVpa2N6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjYxNzIsImV4cCI6MjA5Nzc0MjE3Mn0.KU2eRYiaRIaGgLaV2qeAX9If2e-oHO3UTZErz4n_Vs4';
-            const ENRIQ_TABLE = 'BD';
+            const ENRIQ_TABLE = 'BD_HELP';
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            const LINK_EXTERNO = 'https://exemplo.com/portal'; // altere para o link desejado
 
             let allData = [];
             let headers = [];
@@ -527,7 +458,6 @@
             let tipoValues = [];
             let idx = {};
             let charts = {};
-            let idxPltFechado = -1; // índice da coluna 'PLTFECHADO'
 
             let allPage = 1;
             const allPerPage = 50;
@@ -537,53 +467,29 @@
             let smartSearchValue = '';
             let colaboradorSearchValue = '';
 
-            const turnoPorLoja = {
-                25: '3º Turno', 178: '3º Turno', 312: '3º Turno', 269: '3º Turno', 285: '3º Turno',
-                274: '3º Turno', 8: '3º Turno', 263: '3º Turno', 93: '3º Turno', 149: '3º Turno',
-                64: '3º Turno', 267: '3º Turno', 203: '3º Turno', 123: '3º Turno', 343: '3º Turno',
-                281: '3º Turno', 265: '3º Turno', 75: '3º Turno', 2: '3º Turno', 173: '3º Turno',
-                7: '3º Turno', 349: '3º Turno', 272: '3º Turno', 208: '3º Turno', 137: '3º Turno',
-                22: '3º Turno', 161: '3º Turno', 49: '3º Turno', 81: '3º Turno', 270: '3º Turno',
-                17: '3º Turno', 126: '3º Turno', 60: '3º Turno', 167: '3º Turno', 9: '3º Turno',
-                31: '3º Turno', 50: '3º Turno', 168: '3º Turno', 244: '3º Turno', 303: '3º Turno',
-                166: '3º Turno', 112: '3º Turno', 354: '3º Turno',
-                351: '1º Turno', 39: '1º Turno', 1: '1º Turno', 3: '1º Turno', 273: '1º Turno',
-                156: '1º Turno', 276: '1º Turno', 246: '1º Turno', 32: '1º Turno', 10: '1º Turno',
-                144: '1º Turno', 271: '1º Turno', 16: '1º Turno', 24: '1º Turno', 157: '1º Turno',
-                165: '1º Turno', 153: '1º Turno', 89: '1º Turno', 313: '1º Turno', 20: '1º Turno',
-                121: '1º Turno', 205: '1º Turno', 295: '1º Turno', 59: '1º Turno', 15: '1º Turno',
-                19: '1º Turno', 339: '1º Turno', 148: '1º Turno', 336: '1º Turno', 282: '1º Turno',
-                58: '1º Turno', 130: '1º Turno', 94: '1º Turno', 124: '1º Turno', 154: '1º Turno',
-                21: '1º Turno', 53: '1º Turno', 258: '1º Turno', 254: '1º Turno',
-                12: '2º Turno', 200: '2º Turno', 174: '2º Turno', 278: '2º Turno', 85: '2º Turno',
-                129: '2º Turno', 104: '2º Turno', 96: '2º Turno', 38: '2º Turno', 233: '2º Turno',
-                280: '2º Turno', 18: '2º Turno', 151: '2º Turno', 350: '2º Turno', 45: '2º Turno',
-                127: '2º Turno', 260: '2º Turno', 155: '2º Turno', 199: '2º Turno', 48: '2º Turno',
-                279: '2º Turno', 74: '2º Turno', 209: '2º Turno', 337: '2º Turno', 68: '2º Turno',
-                86: '2º Turno', 275: '2º Turno', 73: '2º Turno', 240: '2º Turno', 327: '2º Turno',
-                326: '2º Turno', 61: '2º Turno', 301: '2º Turno', 14: '2º Turno', 63: '2º Turno',
-                237: '2º Turno'
-            };
-
-            const themeToggle = document.getElementById('themeToggle');
-            themeToggle.addEventListener('click', () => {
-                document.body.classList.toggle('dark');
-                const isDark = document.body.classList.contains('dark');
-                themeToggle.textContent = isDark ? '☀️' : '🌙';
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-                if (allData.length) renderAll();
-            });
-            if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark');
-                themeToggle.textContent = '☀️';
+            // ---------- Dark mode ----------
+            function applyTheme(dark) {
+                if (dark) {
+                    document.body.classList.add('dark');
+                    document.getElementById('themeIcon').textContent = '☀️';
+                } else {
+                    document.body.classList.remove('dark');
+                    document.getElementById('themeIcon').textContent = '🌙';
+                }
+                localStorage.setItem('darkMode', dark);
+                if (Object.keys(charts).length) renderAll();
             }
+            function toggleTheme() {
+                applyTheme(!document.body.classList.contains('dark'));
+            }
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            const savedTheme = localStorage.getItem('darkMode');
+            applyTheme(savedTheme === 'true');
 
+            // ---------- Funções auxiliares ----------
             function toast(msg, type = 'success') {
-                const old = document.querySelector('.toast');
-                if (old) old.remove();
-                const t = document.createElement('div');
-                t.className = `toast ${type}`;
-                t.textContent = msg;
+                const old = document.querySelector('.toast'); if (old) old.remove();
+                const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg;
                 document.body.appendChild(t);
                 setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; }, 3000);
                 setTimeout(() => t.remove(), 3500);
@@ -603,8 +509,7 @@
                 str = String(str).trim();
                 const parts = str.split(/[\/\-\.]/);
                 if (parts.length === 3) {
-                    const day = parseInt(parts[0], 10);
-                    const month = parseInt(parts[1], 10) - 1;
+                    const day = parseInt(parts[0], 10), month = parseInt(parts[1], 10) - 1;
                     let year = parseInt(parts[2], 10);
                     if (year < 100) year += 2000;
                     if (!isNaN(day) && !isNaN(month) && !isNaN(year)) return new Date(year, month, day);
@@ -613,332 +518,97 @@
                 return isNaN(d.getTime()) ? null : d;
             }
 
-            function nomeMesExtenso(date) {
-                const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-                return meses[date.getMonth()];
-            }
+            function nomeMesExtenso(date) { return ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][date.getMonth()]; }
+            function gerarKeyMes(date) { if (!date || isNaN(date.getTime())) return ''; return `${nomeMesExtenso(date)} de ${date.getFullYear()}`; }
+            function formatCurrency(val) { if (typeof val !== 'number' || isNaN(val)) return 'R$ 0,00'; return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+            function formatNumber(val) { if (typeof val !== 'number' || isNaN(val)) return '0'; return val.toLocaleString('pt-BR'); }
+            function formatK(val) { if (typeof val !== 'number' || isNaN(val)) return '0k'; const vk = val / 1000; const abs = Math.abs(vk); const digits = abs >= 100 ? 0 : abs >= 10 ? 1 : abs >= 1 ? 2 : 3; return vk.toLocaleString('pt-BR', { maximumFractionDigits: digits }) + 'k'; }
+            function escapeHTML(str) { return String(str || '').replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+            function computeTotalDivergencia(data) { return data.reduce((acc, r) => acc + (typeof r['CUSTO_TOTAL_ITEM'] === 'number' ? r['CUSTO_TOTAL_ITEM'] : 0), 0); }
 
-            function gerarKeyMes(date) {
-                if (!date || isNaN(date.getTime())) return '';
-                return `${nomeMesExtenso(date)} de ${date.getFullYear()}`;
-            }
-
-            function extrairNLoja(lojaDestino) {
-                if (!lojaDestino) return '';
-                const str = String(lojaDestino);
-                const idx = str.indexOf('- ');
-                return idx !== -1 ? str.substring(idx + 2).trim() : '';
-            }
-
-            function formatBytes(bytes) {
-                if (bytes === 0) return '0 B';
-                const k = 1024;
-                const sizes = ['B', 'KB', 'MB', 'GB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-            }
-
-            function exportToCSV(dataArray, filename = 'exportacao.csv') {
-                const csv = Papa.unparse(dataArray, { delimiter: ";", header: true });
-                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = filename;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);
-            }
-
-            function setupTableDoubleClick(containerId, colunaChave) {
-                const container = document.getElementById(containerId);
-                if (!container) return;
-                container.addEventListener('dblclick', function(e) {
-                    const target = e.target;
-                    if (target.tagName === 'TH') {
-                        exportToCSV(filteredData, `${containerId}_all.csv`);
-                        toast(`📥 ${filteredData.length} registro(s) exportado(s)!`);
+            // ---------- Carregar dados do BD_HELP ----------
+            async function loadFromSupabase() {
+                const overlay = document.getElementById('loadingOverlay');
+                overlay.style.display = 'flex';
+                document.getElementById('loadingMessage').textContent = 'Carregando dados do BD_HELP...';
+                try {
+                    const allRows = [];
+                    let from = 0;
+                    const pageSize = 1000;
+                    while (true) {
+                        const { data, error } = await supabase.from(ENRIQ_TABLE).select('*').range(from, from + pageSize - 1);
+                        if (error) throw error;
+                        if (data && data.length) { allRows.push(...data); from += pageSize; if (data.length < pageSize) break; }
+                        else break;
+                    }
+                    if (!allRows.length) {
+                        overlay.style.display = 'none';
+                        document.getElementById('noDataMessage').style.display = 'block';
+                        document.getElementById('mainContent').style.display = 'none';
+                        toast('Nenhum dado no BD_HELP.', 'error');
                         return;
                     }
-                    const tr = target.closest('tr');
-                    if (!tr) return;
-                    const valor = tr.dataset.valor;
-                    if (!valor) return;
-                    const dados = filteredData.filter(r => String(r[colunaChave] || '') === valor);
-                    if (dados.length > 0) {
-                        exportToCSV(dados, `${colunaChave}_${valor}.csv`);
-                        toast(`📥 ${dados.length} registro(s) exportado(s)!`);
-                    } else {
-                        toast('⚠️ Nenhum dado para exportar.', 'warning');
-                    }
-                });
-            }
+                    allData = allRows;
+                    headers = Object.keys(allData[0]); // usa a ordem do banco
 
-            const dropzone = document.getElementById('dropzone');
-            const fileInput = document.getElementById('fileInput');
-            dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
-            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-            dropzone.addEventListener('drop', e => {
-                e.preventDefault();
-                dropzone.classList.remove('drag-over');
-                handleFile(e.dataTransfer.files[0]);
-            });
-            dropzone.addEventListener('click', e => {
-                if (e.target.tagName !== 'LABEL' && e.target.tagName !== 'BUTTON') fileInput.click();
-            });
-            fileInput.addEventListener('change', () => {
-                handleFile(fileInput.files[0]);
-                fileInput.value = '';
-            });
+                    allData.forEach(row => {
+                        row._dataObj = parseDate(row['DATA_ABERTURA']);
+                        row['KEY_MÊS'] = row._dataObj ? gerarKeyMes(row._dataObj) : '';
+                        const raw = row['CUSTO_TOTAL_ITEM'];
+                        if (raw !== undefined && raw !== null) {
+                            const num = parseBrazilianNumber(String(raw));
+                            row['CUSTO_TOTAL_ITEM'] = isNaN(num) ? 0 : num;
+                        } else row['CUSTO_TOTAL_ITEM'] = 0;
+                    });
 
-            async function fetchEnriquecimento() {
-                let allRows = [];
-                let rangeStart = 0;
-                const pageSize = 1000;
-                let fetchMore = true;
+                    // Índices para facilitar referências
+                    idx = {
+                        'data_abertura': 'DATA_ABERTURA',
+                        'status': 'STATUS',
+                        'case_task': 'CASE_TASK',
+                        'tipo_divergencia': 'TIPO_DIVERGENCIA',
+                        'loja_destino': 'LOJA_DESTINO',
+                        'descricao_produto': 'DESCRICAO_PRODUTO',
+                        'custo_total': 'CUSTO_TOTAL_ITEM',
+                        'turno_ini': 'TURNO_INI',
+                        'tipo_lote': 'TIPO_LOTE',
+                        'produtivo': 'PRODUTIVO',
+                        'codprodutivo': 'CODPRODUTIVO'
+                    };
 
-                while (fetchMore) {
-                    const { data, error } = await supabase
-                        .from(ENRIQ_TABLE)
-                        .select('*')
-                        .range(rangeStart, rangeStart + pageSize - 1);
-                    
-                    if (error) {
-                        toast('Erro ao buscar enriquecimento: ' + error.message, 'error');
-                        console.error(error);
-                        return [];
-                    }
-                    if (data && data.length) {
-                        allRows = allRows.concat(data);
-                        rangeStart += pageSize;
-                        if (data.length < pageSize) fetchMore = false;
-                    } else {
-                        fetchMore = false;
-                    }
-                }
-                return allRows;
-            }
-
-            async function handleFile(file) {
-                if (!file) return;
-                const ext = file.name.split('.').pop().toLowerCase();
-                if (!['csv', 'tsv', 'txt'].includes(ext)) return toast('⚠️ Selecione um arquivo CSV válido.', 'error');
-                
-                const overlay = document.getElementById('loadingOverlay');
-                const msg = document.getElementById('loadingMessage');
-                overlay.style.display = 'flex';
-                msg.textContent = 'Processando Dados, Por favor Aguarde...😉';
-                
-                Papa.parse(file, {
-                    header: true,
-                    dynamicTyping: false,
-                    skipEmptyLines: true,
-                    encoding: 'Windows-1252',
-                    complete: async function(res) {
-                        try {
-                            if (!res.data || res.data.length === 0) {
-                                overlay.style.display = 'none';
-                                return toast('Arquivo vazio.', 'error');
-                            }
-                            allData = res.data.filter(r => Object.values(r).some(v => v !== null && v !== undefined && v !== ''));
-                            headers = res.meta.fields || [];
-                            if (headers.length === 0) {
-                                overlay.style.display = 'none';
-                                return toast('Sem colunas.', 'error');
-                            }
-
-                            headers.push('N LOJA');
-                            headers.push('KEY MÊS');
-                            headers.push('KEY_CARGA_LOTE');
-
-                            mapColumns();
-
-                            const statusCol = getCol('status');
-                            const tipoCol = getCol('tipoDivergencia');
-                            const valorCol = getCol('valorDivergencia');
-                            const dataCol = getCol('abertoEm');
-                            const lojaCol = getCol('lojaDestino');
-                            const numCargaCol = getCol('numeroCarga');
-                            const loteCol = getCol('lote');
-
-                            allData.forEach(row => {
-                                if (lojaCol) row['N LOJA'] = extrairNLoja(row[lojaCol]); else row['N LOJA'] = '';
-                                if (dataCol) {
-                                    const d = parseDate(row[dataCol]);
-                                    row['_dataObj'] = d;
-                                    row['KEY MÊS'] = d ? gerarKeyMes(d) : '';
-                                } else { row['_dataObj'] = null; row['KEY MÊS'] = ''; }
-                                if (numCargaCol && loteCol) {
-                                    row['KEY_CARGA_LOTE'] = String(row[numCargaCol] || '').trim() + '_' + String(row[loteCol] || '').trim();
-                                } else { row['KEY_CARGA_LOTE'] = ''; }
-                                if (statusCol) {
-                                    let val = row[statusCol];
-                                    row[statusCol] = (!val || String(val).trim() === '') ? 'Em Aberto' : String(val).trim();
-                                }
-                                if (tipoCol) {
-                                    let val = row[tipoCol];
-                                    row[tipoCol] = (!val || String(val).trim() === '') ? 'Não informado' : String(val).trim();
-                                }
-                                if (valorCol && row[valorCol] !== null && row[valorCol] !== undefined) {
-                                    const converted = parseBrazilianNumber(String(row[valorCol]));
-                                    row[valorCol] = isNaN(converted) ? 0 : converted;
-                                }
-                            });
-
-                            const DADOS_TXTS = await fetchEnriquecimento();
-
-                            const novasColunas = [
-                                'DTAHORINITAREFA', 'HR INI', 'DTAHORFIMTAREFA', 'HR FIM',
-                                'DTAHORFATURAMENTO', 'HR FAT', 'STATUS_TXT', 'NROCARGA',
-                                'SEQLOTE', 'PLTFECHADO', 'CODPRODUTIVO', 'PRODUTIVO',
-                                'TURNO_INI', 'TURNO_FIM', 'TURNO_FAT'
-                            ];
-                            headers.push(...novasColunas);
-
-                            // Índice da coluna PLTFECHADO (enriquecida)
-                            idxPltFechado = headers.indexOf('PLTFECHADO');
-
-                            let matchCount = 0;
-                            if (DADOS_TXTS.length > 0) {
-                                const mapaTxt = new Map();
-                                DADOS_TXTS.forEach(txtRow => {
-                                    const chave = String(txtRow['KEY_CARGA_LOTE'] || '').trim();
-                                    if (chave) mapaTxt.set(chave, txtRow);
-                                });
-                                allData.forEach(row => {
-                                    const chave = String(row['KEY_CARGA_LOTE'] || '').trim();
-                                    const match = mapaTxt.get(chave);
-                                    if (match) {
-                                        novasColunas.forEach(col => {
-                                            const campoOrigem = col === 'STATUS_TXT' ? 'STATUS' : col;
-                                            row[col] = match[campoOrigem] !== undefined ? match[campoOrigem] : '';
-                                        });
-                                        matchCount++;
-                                    } else {
-                                        novasColunas.forEach(col => { row[col] = ''; });
-                                    }
-                                });
-                                toast(`✅ ${matchCount} registros complementares carregados.`);
-                            } else {
-                                allData.forEach(row => novasColunas.forEach(col => row[col] = ''));
-                                toast('⚠️ Nenhum dado de enriquecimento encontrado no Supabase.', 'warning');
-                            }
-
-                            allData.forEach(row => {
-                                ['CODPRODUTIVO', 'NROCARGA'].forEach(col => {
-                                    if (row[col] !== undefined && row[col] !== '' && row[col] !== null) {
-                                        const num = parseFloat(String(row[col]).replace(',', '.'));
-                                        if (!isNaN(num)) row[col] = String(Math.round(num));
-                                    }
-                                });
-                            });
-
-                            const statusSet = new Set();
-                            const tipoSet = new Set();
-                            const pltValuesSet = new Set();
-                            allData.forEach(r => { 
-                                if (statusCol) statusSet.add(r[statusCol]); 
-                                if (tipoCol) tipoSet.add(r[tipoCol]);
-                                if (idxPltFechado >= 0) {
-                                    const val = String(r[headers[idxPltFechado]] || '').trim();
-                                    if (val) pltValuesSet.add(val);
-                                }
-                            });
-                            statusValues = Array.from(statusSet).sort();
-                            tipoValues = Array.from(tipoSet).sort();
-                            populatePltFilter(Array.from(pltValuesSet).sort());
-                            populateFilters();
-                            populateDateMode();
-                            setupSmartSearch();
-                            setupColaboradorSearch();
-                            setupCameraButtons();
-
-                            document.getElementById('fileName').textContent = file.name;
-                            document.getElementById('colCount').textContent = headers.length;
-                            document.getElementById('rowCount').textContent = allData.length.toLocaleString('pt-BR');
-                            document.getElementById('csvSize').textContent = formatBytes(file.size);
-                            const totalDiv = computeTotalDivergencia(allData);
-                            document.getElementById('totalDiv').textContent = formatCurrency(totalDiv);
-                            const supabaseSizeBytes = new Blob([JSON.stringify(DADOS_TXTS)]).size;
-                            document.getElementById('supabaseSize').textContent = formatBytes(supabaseSizeBytes);
-                            document.getElementById('fileInfo').style.display = 'flex';
-                            document.getElementById('mainContent').style.display = 'block';
-                            document.getElementById('noDataMessage').style.display = 'none';
-                            resetTabs();
-                            applyAllFilters();
-                            renderAll();
-                            
-                            overlay.style.display = 'none';
-                            toast('✅ Dashboard pronto!', 'success');
-                        } catch (err) {
-                            overlay.style.display = 'none';
-                            toast('Erro inesperado ao processar arquivo.', 'error');
-                            console.error(err);
-                        }
-                    },
-                    error: () => {
-                        overlay.style.display = 'none';
-                        toast('Erro ao ler o arquivo.', 'error');
-                    }
-                });
-            }
-
-            function mapColumns() {
-                const mappings = [
-                    ['abertoEm', ['Aberto em', 'aberto em', 'ABERTO EM', 'Data de abertura']],
-                    ['caseTask', ['Case Task', 'case task', 'CASE TASK', 'Número do chamado', 'numero chamado', 'chamado']],
-                    ['tipoDivergencia', ['Tipo da divergência', 'tipo da divergencia', 'TIPO DA DIVERGÊNCIA', 'Tipo divergencia', 'Divergência', 'Tipo']],
-                    ['numeroCarga', ['Número da carga de expedição', 'numero da carga', 'Número da carga', 'Carga']],
-                    ['cdOrigem', ['CD de Origem', 'cd de origem', 'CD Origem', 'Origem']],
-                    ['lojaDestino', ['Loja de Destino', 'loja de destino', 'Loja Destino', 'Destino', 'loja', 'LOJA']],
-                    ['codigoProduto', ['Código do produto/item', 'codigo do produto', 'Código produto', 'codigo produto', 'Código', 'codigo', 'SKU']],
-                    ['descricaoProduto', ['Descrição do produto/item', 'descricao do produto', 'Descrição produto', 'descricao produto', 'Produto', 'Descrição']],
-                    ['lote', ['Lote', 'lote', 'LOTE']],
-                    ['valorDivergencia', ['Custo total do item (UN)', 'custo total do item', 'Custo total', 'Valor divergência', 'valor divergencia', 'Valor', 'Custo']],
-                    ['status', ['Status', 'status', 'STATUS', 'Estado', 'estado']],
-                    ['quantidadeNF', ['Quantidade da Nota Fiscal', 'quantidade nota fiscal', 'Quantidade NF']]
-                ];
-                for (let [key, possibleNames] of mappings) {
-                    for (let name of possibleNames) {
-                        const found = headers.find(h => h.trim().toLowerCase() === name.toLowerCase());
-                        if (found) { idx[key] = headers.indexOf(found); break; }
-                    }
-                    if (idx[key] === undefined) {
-                        for (let name of possibleNames) {
-                            const found = headers.find(h => h.toLowerCase().includes(name.toLowerCase()));
-                            if (found) { idx[key] = headers.indexOf(found); break; }
-                        }
-                    }
+                    statusValues = [...new Set(allData.map(r => r['STATUS'] || '').filter(Boolean))].sort();
+                    tipoValues = [...new Set(allData.map(r => r['TIPO_DIVERGENCIA'] || '').filter(Boolean))].sort();
+                    const pltValues = [...new Set(allData.map(r => r['TIPO_LOTE'] || '').filter(Boolean))].sort();
+                    populatePltFilter(pltValues);
+                    populateFilters();
+                    populateDateMode();
+                    setupSmartSearch();
+                    setupColaboradorSearch();
+                    setupCameraButtons();
+                    document.getElementById('mainContent').style.display = 'block';
+                    document.getElementById('noDataMessage').style.display = 'none';
+                    resetTabs();
+                    applyAllFilters();
+                    renderAll();
+                    overlay.style.display = 'none';
+                    document.getElementById('ultimaAtualizacao').textContent = 'Última atualização: ' + new Date().toLocaleString('pt-BR');
+                    toast('✅ Dados carregados com sucesso!', 'success');
+                } catch (err) {
+                    overlay.style.display = 'none';
+                    toast('Erro ao carregar BD_HELP: ' + err.message, 'error');
+                    console.error(err);
                 }
             }
-            function getCol(key) { return headers[idx[key]]; }
 
-            function formatCurrency(val) {
-                if (typeof val !== 'number' || isNaN(val)) return 'R$ 0,00';
-                return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            }
-            function formatNumber(val) {
-                if (typeof val !== 'number' || isNaN(val)) return '0';
-                return val.toLocaleString('pt-BR');
-            }
-            function formatK(val) {
-                if (typeof val !== 'number' || isNaN(val)) return '0k';
-                const valueInK = val / 1000;
-                const absValue = Math.abs(valueInK);
-                const maxDigits = absValue >= 100 ? 0 : absValue >= 10 ? 1 : absValue >= 1 ? 2 : 3;
-                return valueInK.toLocaleString('pt-BR', { maximumFractionDigits: maxDigits }) + 'k';
-            }
-            function escapeHTML(str) {
-                if (!str) return '';
-                return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-            }
+            // Inicialização automática
+            window.addEventListener('DOMContentLoaded', loadFromSupabase);
 
-            function computeTotalDivergencia(data) {
-                const col = getCol('valorDivergencia');
-                if (!col) return 0;
-                return data.reduce((acc, r) => acc + (typeof r[col] === 'number' ? r[col] : 0), 0);
-            }
+            // Botão link externo
+            document.getElementById('btnLinkExterno').addEventListener('click', () => {
+                window.open(LINK_EXTERNO, '_blank');
+            });
 
+            // ---------- UI Filtros ----------
             function populateDateMode() {
                 const mode = document.getElementById('dateMode');
                 const container = document.getElementById('dateInputs');
@@ -947,7 +617,7 @@
                     if (mode.value === 'single') container.innerHTML = '<input type="date" id="dateStart">';
                     else if (mode.value === 'range') container.innerHTML = '<input type="date" id="dateStart"> <span>até</span> <input type="date" id="dateEnd">';
                     else if (mode.value === 'month') {
-                        const meses = [...new Set(allData.map(r => r['KEY MÊS']).filter(Boolean))].sort();
+                        const meses = [...new Set(allData.map(r => r['KEY_MÊS']).filter(Boolean))].sort();
                         let h = '<select id="dateStart"><option value="">Selecionar mês...</option>';
                         meses.forEach(m => h += `<option value="${m}">${m}</option>`);
                         h += '</select>';
@@ -972,7 +642,7 @@
                     const s = new Date(startVal + 'T00:00:00'), e = new Date(endVal + 'T23:59:59');
                     return r => r._dataObj && r._dataObj >= s && r._dataObj <= e;
                 }
-                if (mode === 'month') return r => r['KEY MÊS'] === startVal;
+                if (mode === 'month') return r => r['KEY_MÊS'] === startVal;
                 return () => true;
             }
 
@@ -980,62 +650,32 @@
                 const container = document.getElementById(containerId);
                 const optionsContainer = document.getElementById(optionsId);
                 const selectedSpan = container.querySelector('.multiselect-selected span');
-                
-                const listDiv = document.createElement('div');
-                listDiv.style.maxHeight = '200px';
-                listDiv.style.overflowY = 'auto';
-                
+                const listDiv = document.createElement('div'); listDiv.style.maxHeight = '200px'; listDiv.style.overflowY = 'auto';
                 optionsContainer.innerHTML = '';
                 values.forEach(val => {
-                    const div = document.createElement('div');
-                    div.className = 'multiselect-option';
+                    const div = document.createElement('div'); div.className = 'multiselect-option';
                     div.innerHTML = `<input type="checkbox" value="${val}"> ${val}`;
-                    div.onclick = (e) => {
-                        e.stopPropagation();
-                        if (e.target.tagName !== 'INPUT') {
-                            const cb = div.querySelector('input');
-                            cb.checked = !cb.checked;
-                        }
-                    };
+                    div.onclick = (e) => { e.stopPropagation(); if (e.target.tagName !== 'INPUT') { const cb = div.querySelector('input'); cb.checked = !cb.checked; } };
                     listDiv.appendChild(div);
                 });
                 optionsContainer.appendChild(listDiv);
-
-                const footer = document.createElement('div');
-                footer.className = 'multiselect-footer';
-                footer.innerHTML = `
-                    <button class="btn-mini btn-apply">Aplicar</button>
-                    <button class="btn-mini btn-clear">Limpar</button>
-                `;
-                footer.querySelector('.btn-apply').onclick = (e) => {
-                    e.stopPropagation();
-                    updateText();
-                    container.classList.remove('active');
-                    onChange();
-                };
-                footer.querySelector('.btn-clear').onclick = (e) => {
-                    e.stopPropagation();
-                    optionsContainer.querySelectorAll('input').forEach(i => i.checked = false);
-                    updateText();
-                    container.classList.remove('active');
-                    onChange();
-                };
+                const footer = document.createElement('div'); footer.className = 'multiselect-footer';
+                footer.innerHTML = `<button class="btn-mini btn-apply">Aplicar</button><button class="btn-mini btn-clear">Limpar</button>`;
+                footer.querySelector('.btn-apply').onclick = (e) => { e.stopPropagation(); updateText(); container.classList.remove('active'); onChange(); };
+                footer.querySelector('.btn-clear').onclick = (e) => { e.stopPropagation(); optionsContainer.querySelectorAll('input').forEach(i => i.checked = false); updateText(); container.classList.remove('active'); onChange(); };
                 optionsContainer.appendChild(footer);
-
                 function updateText() {
                     const checked = Array.from(optionsContainer.querySelectorAll('input:checked')).map(i => i.value);
-                    if (checked.length === 0) selectedSpan.textContent = 'Todos';
+                    if (!checked.length) selectedSpan.textContent = 'Todos';
                     else if (checked.length === 1) selectedSpan.textContent = checked[0];
                     else selectedSpan.textContent = `${checked.length} selecionados`;
                 }
-
                 container.querySelector('.multiselect-selected').onclick = (e) => {
                     e.stopPropagation();
                     const isActive = container.classList.contains('active');
                     document.querySelectorAll('.multiselect-container').forEach(c => c.classList.remove('active'));
                     if (!isActive) container.classList.add('active');
                 };
-
                 optionsContainer.onclick = (e) => e.stopPropagation();
                 updateText();
             }
@@ -1044,67 +684,42 @@
                 const container = document.getElementById(optionsId);
                 if (!container) return null;
                 const checked = Array.from(container.querySelectorAll('input:checked')).map(i => i.value);
-                return checked.length > 0 ? checked : null;
+                return checked.length ? checked : null;
             }
 
             function populatePltFilter(values) {
-                const select = document.getElementById('pltFechadoFilter');
-                select.innerHTML = '<option value="Todos">📌 Todos</option>';
-                values.forEach(v => {
-                    select.innerHTML += `<option value="${v}">${v}</option>`;
-                });
-                select.onchange = () => { applyAllFilters(); renderAll(); };
+                const sel = document.getElementById('pltFechadoFilter');
+                sel.innerHTML = '<option value="Todos">📌 Todos</option>';
+                values.forEach(v => sel.innerHTML += `<option value="${v}">${v}</option>`);
+                sel.onchange = () => { applyAllFilters(); renderAll(); };
             }
 
             function populateFilters() {
                 createMultiselect('statusFilterContainer', 'statusOptions', statusValues, () => { applyAllFilters(); renderAll(); });
                 createMultiselect('tipoFilterContainer', 'tipoOptions', tipoValues, () => { applyAllFilters(); renderAll(); });
-                createMultiselect('turnoFilterContainer', 'turnoOptions', ['1º Turno', '2º Turno', '3º Turno'], () => { applyAllFilters(); renderAll(); });
-                const turnoProduzidoValues = [...new Set(allData.map(r => String(r['TURNO_INI'] || '').trim()).filter(Boolean))].sort();
-                createMultiselect('turnoProduzidoFilterContainer', 'turnoProduzidoOptions', turnoProduzidoValues, () => { applyAllFilters(); renderAll(); });
+                const turnoProd = [...new Set(allData.map(r => String(r['TURNO_INI'] || '').trim()).filter(Boolean))].sort();
+                createMultiselect('turnoProduzidoFilterContainer', 'turnoProduzidoOptions', turnoProd, () => { applyAllFilters(); renderAll(); });
                 document.addEventListener('click', () => document.querySelectorAll('.multiselect-container').forEach(c => c.classList.remove('active')));
             }
 
             function applyAllFilters() {
                 const selStatus = getMultiselectValues('statusOptions');
                 const selTipo = getMultiselectValues('tipoOptions');
-                const selTurno = getMultiselectValues('turnoOptions');
-                const selTurnoProduzido = getMultiselectValues('turnoProduzidoOptions');
+                const selTurnoProd = getMultiselectValues('turnoProduzidoOptions');
                 const pltFechado = document.getElementById('pltFechadoFilter')?.value || 'Todos';
-                
                 const dateFilterFn = getDateFilterFn();
                 filteredData = allData.filter(dateFilterFn);
-
-                if (selStatus) { 
-                    const col = getCol('status'); 
-                    if (col) filteredData = filteredData.filter(r => selStatus.includes(String(r[col]))); 
-                }
-                if (selTipo) { 
-                    const col = getCol('tipoDivergencia'); 
-                    if (col) filteredData = filteredData.filter(r => selTipo.includes(String(r[col]))); 
-                }
-                if (selTurno) {
-                    filteredData = filteredData.filter(r => {
-                        const n = String(r['N LOJA'] || '').trim();
-                        const lojaNum = parseInt(n, 10);
-                        return selTurno.includes(turnoPorLoja[lojaNum]);
-                    });
-                }
-                if (selTurnoProduzido) {
-                    filteredData = filteredData.filter(r => selTurnoProduzido.includes(String(r['TURNO_INI'] || '').trim()));
-                }
-                if (pltFechado !== 'Todos' && idxPltFechado >= 0) {
-                    const colPlt = headers[idxPltFechado];
-                    filteredData = filteredData.filter(r => String(r[colPlt] || '').trim() === pltFechado);
-                }
+                if (selStatus) filteredData = filteredData.filter(r => selStatus.includes(String(r['STATUS'] || '')));
+                if (selTipo) filteredData = filteredData.filter(r => selTipo.includes(String(r['TIPO_DIVERGENCIA'] || '')));
+                if (selTurnoProd) filteredData = filteredData.filter(r => selTurnoProd.includes(String(r['TURNO_INI'] || '')));
+                if (pltFechado !== 'Todos') filteredData = filteredData.filter(r => String(r['TIPO_LOTE'] || '').trim() === pltFechado);
                 if (smartSearchValue) {
-                    const isNumeric = /^\d+$/.test(smartSearchValue);
-                    if (isNumeric) filteredData = filteredData.filter(r => String(r['N LOJA'] || '') === smartSearchValue);
-                    else { const col = getCol('lojaDestino'); if (col) filteredData = filteredData.filter(r => String(r[col] || '').toLowerCase() === smartSearchValue.toLowerCase()); }
+                    const isNum = /^\d+$/.test(smartSearchValue);
+                    if (isNum) filteredData = filteredData.filter(r => String(r['Nº_LOJA'] || '') === smartSearchValue);
+                    else filteredData = filteredData.filter(r => String(r['LOJA_DESTINO'] || '').toLowerCase() === smartSearchValue.toLowerCase());
                 }
                 allFiltered = [...filteredData];
-                allPage = 1;
-                chamadoPage = 1;
+                allPage = 1; chamadoPage = 1;
             }
 
             function setupSmartSearch() {
@@ -1113,17 +728,14 @@
                 input.oninput = function() {
                     const term = this.value.trim();
                     if (!term) { dropdown.style.display = 'none'; smartSearchValue = ''; applyAllFilters(); renderAll(); return; }
-                    const isNumeric = /^\d+$/.test(term);
+                    const isNum = /^\d+$/.test(term);
                     let suggestions = [];
-                    if (isNumeric) {
-                        const valores = allData.map(r => String(r['N LOJA'] || '')).filter(v => v.includes(term));
-                        suggestions = [...new Set(valores)].sort();
+                    if (isNum) {
+                        const vals = allData.map(r => String(r['Nº_LOJA'] || '')).filter(v => v.includes(term));
+                        suggestions = [...new Set(vals)].sort();
                     } else {
-                        const lojaCol = getCol('lojaDestino');
-                        if (lojaCol) {
-                            const valores = allData.map(r => String(r[lojaCol] || '')).filter(v => v.toLowerCase().includes(term.toLowerCase()));
-                            suggestions = [...new Set(valores)].sort();
-                        }
+                        const vals = allData.map(r => String(r['LOJA_DESTINO'] || '')).filter(v => v.toLowerCase().includes(term.toLowerCase()));
+                        suggestions = [...new Set(vals)].sort();
                     }
                     suggestions = suggestions.slice(0, 10);
                     if (suggestions.length) {
@@ -1132,14 +744,7 @@
                     } else dropdown.style.display = 'none';
                 };
                 input.onkeydown = (e) => { if (e.key === 'Enter') { smartSearchValue = input.value.trim(); dropdown.style.display = 'none'; applyAllFilters(); renderAll(); } };
-                dropdown.onclick = (e) => {
-                    if (e.target.classList.contains('suggestion-item')) {
-                        input.value = e.target.textContent;
-                        smartSearchValue = e.target.textContent;
-                        dropdown.style.display = 'none';
-                        applyAllFilters(); renderAll();
-                    }
-                };
+                dropdown.onclick = (e) => { if (e.target.classList.contains('suggestion-item')) { input.value = e.target.textContent; smartSearchValue = e.target.textContent; dropdown.style.display = 'none'; applyAllFilters(); renderAll(); } };
             }
 
             function setupColaboradorSearch() {
@@ -1147,39 +752,20 @@
                 const dropdown = document.getElementById('colaboradorSuggestions');
                 if (!input || !dropdown) return;
                 input.oninput = function() {
-                    const term = this.value.trim();
-                    colaboradorSearchValue = term;
+                    const term = this.value.trim(); colaboradorSearchValue = term;
                     if (!term) { dropdown.style.display = 'none'; renderColaboradoresOfensores(); return; }
-                    const isNumeric = /^\d+$/.test(term);
-                    const sugestoesMap = new Map();
-                    filteredData.forEach(row => {
-                        const matricula = String(row['CODPRODUTIVO'] || '').trim();
-                        const produtivo = String(row['PRODUTIVO'] || '').trim();
-                        if (!produtivo) return;
-                        if (isNumeric && matricula.includes(term)) sugestoesMap.set(matricula, `${matricula} - ${produtivo}`);
-                        else if (!isNumeric && produtivo.toLowerCase().includes(term.toLowerCase())) sugestoesMap.set(produtivo, `${matricula ? matricula + ' - ' : ''}${produtivo}`);
-                    });
-                    const sugestoes = [...sugestoesMap.values()].slice(0, 10);
-                    if (sugestoes.length) {
-                        dropdown.innerHTML = sugestoes.map(s => `<div class="suggestion-item">${escapeHTML(s)}</div>`).join('');
+                    const lowerTerm = term.toLowerCase();
+                    const sugs = [...new Set(allData.map(r => String(r['PRODUTIVO'] || '').trim()).filter(v => v.toLowerCase().includes(lowerTerm)))].sort().slice(0, 10);
+                    if (sugs.length) {
+                        dropdown.innerHTML = sugs.map(s => `<div class="suggestion-item">${escapeHTML(s)}</div>`).join('');
                         dropdown.style.display = 'block';
                     } else dropdown.style.display = 'none';
                     renderColaboradoresOfensores();
                 };
-                dropdown.onclick = (e) => {
-                    if (!e.target.classList.contains('suggestion-item')) return;
-                    input.value = e.target.textContent;
-                    colaboradorSearchValue = e.target.textContent;
-                    dropdown.style.display = 'none';
-                    renderColaboradoresOfensores();
-                };
+                dropdown.onclick = (e) => { if (!e.target.classList.contains('suggestion-item')) return; input.value = e.target.textContent; colaboradorSearchValue = e.target.textContent; dropdown.style.display = 'none'; renderColaboradoresOfensores(); };
             }
 
-            function resetTabs() {
-                document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===0));
-                document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===0));
-            }
-
+            function resetTabs() { document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===0)); document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===0)); }
             document.getElementById('tabNav').onclick = e => {
                 if (e.target.classList.contains('tab-btn')) {
                     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1193,10 +779,10 @@
             function renderKPIs() {
                 const data = filteredData;
                 const total = computeTotalDivergencia(data);
-                const lojas = getCol('lojaDestino') ? new Set(data.map(r => r[getCol('lojaDestino')]).filter(Boolean)).size : 0;
-                const tipos = getCol('tipoDivergencia') ? new Set(data.map(r => r[getCol('tipoDivergencia')]).filter(Boolean)).size : 0;
-                const chamados = getCol('caseTask') ? new Set(data.map(r => r[getCol('caseTask')]).filter(Boolean)).size : 0;
-                const acima5k = getCol('caseTask') && getCol('valorDivergencia') ? aggregateByCol('caseTask').filter(r => r.total > 5000).length : 0;
+                const lojas = new Set(data.map(r => r['LOJA_DESTINO']).filter(Boolean)).size;
+                const tipos = new Set(data.map(r => r['TIPO_DIVERGENCIA']).filter(Boolean)).size;
+                const chamados = new Set(data.map(r => r['CASE_TASK']).filter(Boolean)).size;
+                const acima5k = aggregateByCol('tipo_divergencia', 'custo_total').filter(r => r.total > 5000).length;
                 document.getElementById('kpiGrid').innerHTML = `
                     <div class="kpi-card"><span class="kpi-label">💰 Total Divergências</span><span class="kpi-value">${formatCurrency(total)}</span></div>
                     <div class="kpi-card"><span class="kpi-label">🏪 Lojas</span><span class="kpi-value">${formatNumber(lojas)}</span></div>
@@ -1206,8 +792,8 @@
                 `;
             }
 
-            function aggregateByCol(key, valueKey = 'valorDivergencia', data = filteredData) {
-                const col = getCol(key), valCol = getCol(valueKey);
+            function aggregateByCol(colKey, valueKey = 'custo_total', data = filteredData) {
+                const col = idx[colKey], valCol = idx[valueKey];
                 if (!col || !valCol) return [];
                 const map = {};
                 data.forEach(r => {
@@ -1220,20 +806,18 @@
             }
 
             function renderTable(containerId, columns, data, options = {}) {
-                const { sortable = true, highlightCol, highlightThreshold, highlightClass = 'highlight-red', colFormatters = [], dblClickCol } = options;
                 const container = document.getElementById(containerId);
                 if (!container) return;
                 if (!data.length) { container.innerHTML = '<div class="empty-state">📭 Nenhum dado</div>'; return; }
                 let html = '<table><thead><tr>';
-                columns.forEach(col => html += `<th class="${sortable?'sortable':''}">${escapeHTML(col)}</th>`);
+                columns.forEach(col => html += `<th>${escapeHTML(col)}</th>`);
                 html += '</tr></thead><tbody>';
                 data.forEach(row => {
                     let hl = false;
-                    if (highlightCol !== undefined && highlightThreshold !== undefined && row[highlightCol] > highlightThreshold) hl = true;
-                    const valor = dblClickCol ? String(row[0] ?? '') : null;
-                    html += `<tr class="${hl?highlightClass:''}" data-valor="${valor||''}">`;
+                    if (options.highlightCol !== undefined && options.highlightThreshold !== undefined && row[options.highlightCol] > options.highlightThreshold) hl = true;
+                    html += `<tr class="${hl?options.highlightClass||'highlight-red':''}">`;
                     row.forEach((cell, i) => {
-                        let display = colFormatters[i] ? colFormatters[i](cell) : (typeof cell === 'number' ? formatNumber(cell) : cell);
+                        let display = options.colFormatters?.[i] ? options.colFormatters[i](cell) : (typeof cell === 'number' ? formatNumber(cell) : cell);
                         html += `<td>${escapeHTML(String(display ?? ''))}</td>`;
                     });
                     html += '</tr>';
@@ -1246,10 +830,9 @@
                 const canvas = document.getElementById(canvasId);
                 if (!canvas) return;
                 if (charts[canvasId]) charts[canvasId].destroy();
-                const { datalabelFormatter = v => formatK(v), tooltipLabelFormatter = v => formatK(v) } = opts;
                 const isDark = document.body.classList.contains('dark');
-                const chartTextColor = isDark ? '#e2e8f0' : '#1e293b';
-                const chartGridColor = isDark ? '#334155' : '#e2e8f0';
+                const textColor = isDark ? '#e2e8f0' : '#1e293b';
+                const gridColor = isDark ? '#334155' : '#e2e8f0';
                 charts[canvasId] = new Chart(canvas.getContext('2d'), {
                     type: 'bar',
                     data: { labels, datasets },
@@ -1257,14 +840,14 @@
                         responsive: true, maintainAspectRatio: false,
                         layout: { padding: { top: 25 } },
                         plugins: {
-                            legend: { display: datasets.length > 1, position: 'bottom', labels: { color: chartTextColor } },
-                            title: { display: !!title, text: title, color: chartTextColor },
-                            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${tooltipLabelFormatter(ctx.parsed.y)}` } },
-                            datalabels: { anchor: 'end', align: 'top', formatter: v => datalabelFormatter(v), font: { weight: 'bold', size: 12 }, color: chartTextColor }
+                            legend: { display: datasets.length > 1, position: 'bottom', labels: { color: textColor } },
+                            title: { display: !!title, text: title, color: textColor },
+                            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${opts.tooltipLabelFormatter?.(ctx.parsed.y) ?? formatK(ctx.parsed.y)}` } },
+                            datalabels: { anchor: 'end', align: 'top', formatter: v => opts.datalabelFormatter?.(v) ?? formatK(v), font: { weight: 'bold', size: 12 }, color: textColor }
                         },
                         scales: {
-                            x: { ticks: { maxRotation: 45, color: chartTextColor }, grid: { color: chartGridColor } },
-                            y: { beginAtZero: true, ticks: { color: chartTextColor, callback: v => tooltipLabelFormatter(v) }, grid: { color: chartGridColor } }
+                            x: { ticks: { maxRotation: 45, color: textColor }, grid: { color: gridColor } },
+                            y: { beginAtZero: true, ticks: { color: textColor, callback: v => opts.tooltipLabelFormatter?.(v) ?? formatK(v) }, grid: { color: gridColor } }
                         }
                     }
                 });
@@ -1286,16 +869,15 @@
                 allFiltered = [...filteredData];
                 document.getElementById('searchAll').oninput = () => {
                     const term = document.getElementById('searchAll').value.toLowerCase();
-                    allFiltered = filteredData.filter(r => headers.some(h => String(r[h]??'').toLowerCase().includes(term)));
+                    allFiltered = filteredData.filter(r => headers.some(h => String(r[h] ?? '').toLowerCase().includes(term)));
                     allPage = 1; renderAllTablePage();
                 };
                 renderAllTablePage();
             }
-
             function renderAllTablePage() {
                 const total = allFiltered.length, pages = Math.ceil(total / allPerPage) || 1;
                 const start = (allPage-1)*allPerPage, pageData = allFiltered.slice(start, start+allPerPage);
-                renderTable('allTableWrapper', headers, pageData.map(r => headers.map(c => r[c])), { sortable: true, dblClickCol: getCol('caseTask') });
+                renderTable('allTableWrapper', headers, pageData.map(r => headers.map(c => r[c])));
                 let pagHTML = '';
                 if (pages > 1) {
                     pagHTML += `<button ${allPage===1?'disabled':''} data-p="prev">◀</button>`;
@@ -1310,58 +892,42 @@
                     else if (p) allPage = parseInt(p);
                     renderAllTablePage();
                 };
-                setupTableDoubleClick('allTableWrapper', getCol('caseTask'));
             }
 
             function renderTipoDivergencia() {
-                const agg = aggregateByCol('tipoDivergencia');
-                renderTable('tipoTableWrapper', ['Tipo de Divergência', 'Total Divergência', 'Qtd Ocorrências'], agg.map(r => [r.key, r.total, r.count]), { colFormatters: [null, formatCurrency, formatNumber], dblClickCol: getCol('tipoDivergencia') });
+                const agg = aggregateByCol('tipo_divergencia');
+                renderTable('tipoTableWrapper', ['Tipo de Divergência','Total Divergência','Qtd Ocorrências'], agg.map(r => [r.key, r.total, r.count]), { colFormatters: [null, formatCurrency, formatNumber] });
                 if (agg.length) renderBarChart('chartTipo', agg.map(r=>r.key), [{ label: 'Valor Total', data: agg.map(r=>r.total), backgroundColor: '#2563eb' }], 'Valor por Tipo');
-                setupTableDoubleClick('tipoTableWrapper', getCol('tipoDivergencia'));
             }
-
             function renderLoja() {
-                const agg = aggregateByCol('lojaDestino');
-                renderTable('lojaTableWrapper', ['Loja Destino', 'Total Divergência', 'Qtd Ocorrências'], agg.map(r => [r.key, r.total, r.count]), { colFormatters: [null, formatCurrency, formatNumber], dblClickCol: getCol('lojaDestino') });
-                if (agg.length) {
-                    const top = agg.slice(0,10);
-                    renderBarChart('chartLoja', top.map(r=>r.key), [{ label: 'Valor Total', data: top.map(r=>r.total), backgroundColor: '#2563eb' }], 'Top 10 Lojas', { datalabelFormatter: v=>formatK(v), tooltipLabelFormatter: v=>formatK(v) });
-                }
-                setupTableDoubleClick('lojaTableWrapper', getCol('lojaDestino'));
+                const agg = aggregateByCol('loja_destino');
+                renderTable('lojaTableWrapper', ['Loja Destino','Total Divergência','Qtd Ocorrências'], agg.map(r => [r.key, r.total, r.count]), { colFormatters: [null, formatCurrency, formatNumber] });
+                if (agg.length) { const top = agg.slice(0,10); renderBarChart('chartLoja', top.map(r=>r.key), [{ label: 'Valor Total', data: top.map(r=>r.total), backgroundColor: '#2563eb' }], 'Top 10 Lojas'); }
             }
-
             function renderItem() {
-                const colDesc = getCol('descricaoProduto');
-                const agg = aggregateByCol('descricaoProduto');
-                renderTable('itemTableWrapper', ['Item (Descrição)', 'Total Divergência', 'Qtd Ocorrências'], agg.map(r => [r.key, r.total, r.count]), { colFormatters: [null, formatCurrency, formatNumber], dblClickCol: colDesc });
-                if (agg.length) {
-                    const top = agg.slice(0,10);
-                    renderBarChart('chartItem', top.map(r=>r.key.substring(0,20)), [{ label: 'Valor Total', data: top.map(r=>r.total), backgroundColor: '#2563eb' }], 'Top 10 Itens');
-                }
-                setupTableDoubleClick('itemTableWrapper', colDesc);
+                const agg = aggregateByCol('descricao_produto');
+                renderTable('itemTableWrapper', ['Item (Descrição)','Total Divergência','Qtd Ocorrências'], agg.map(r => [r.key, r.total, r.count]), { colFormatters: [null, formatCurrency, formatNumber] });
+                if (agg.length) { const top = agg.slice(0,10); renderBarChart('chartItem', top.map(r=>r.key.substring(0,20)), [{ label: 'Valor Total', data: top.map(r=>r.total), backgroundColor: '#2563eb' }], 'Top 10 Itens'); }
             }
-
             function renderChamados() {
-                const colChamado = getCol('caseTask'), colAberto = getCol('abertoEm'), colStatus = getCol('status'), colLoja = getCol('lojaDestino'), colVal = getCol('valorDivergencia'), colTipo = getCol('tipoDivergencia');
+                const colChamado = idx['case_task'], colVal = idx['custo_total'];
                 const map = {};
-                if (colChamado && colVal) filteredData.forEach(r => {
-                    const ch = String(r[colChamado]??'N/A'), v = typeof r[colVal]==='number'?r[colVal]:0;
-                    if (!map[ch]) map[ch] = { chamado: ch, total: 0, data: colAberto?String(r[colAberto]??''):'', status: colStatus?String(r[colStatus]??''):'', loja: colLoja?String(r[colLoja]??''):'', tipo: colTipo?String(r[colTipo]??''):'' };
+                filteredData.forEach(r => {
+                    const ch = String(r[colChamado] ?? 'N/A'), v = typeof r[colVal]==='number'?r[colVal]:0;
+                    if (!map[ch]) map[ch] = { chamado: ch, total: 0, data: String(r['DATA_ABERTURA']??''), status: String(r['STATUS']??''), loja: String(r['LOJA_DESTINO']??''), tipo: String(r['TIPO_DIVERGENCIA']??'') };
                     map[ch].total += v;
                 });
                 const agg = Object.values(map).sort((a,b)=>b.total-a.total);
                 window._chamadoData = agg.map(r=>[r.chamado, r.data, r.loja, r.status, r.tipo, r.total]);
                 window._chamadoColumns = ['Chamado','Data Abertura','Loja','Status','Tipo Divergência','Total Divergência'];
                 window._chamadoFormatters = [null,null,null,null,null,formatCurrency];
-                chamadoPage = 1;
-                renderChamadoPage();
+                chamadoPage = 1; renderChamadoPage();
             }
-
             function renderChamadoPage() {
                 const data = window._chamadoData || [], cols = window._chamadoColumns || [], fmt = window._chamadoFormatters || [];
                 const total = data.length, pages = Math.ceil(total / chamadoPerPage) || 1;
                 const start = (chamadoPage-1)*chamadoPerPage, pageData = data.slice(start, start+chamadoPerPage);
-                renderTable('chamadoTableWrapper', cols, pageData, { highlightCol: 5, highlightThreshold: 5000, colFormatters: fmt, dblClickCol: getCol('caseTask') });
+                renderTable('chamadoTableWrapper', cols, pageData, { highlightCol: 5, highlightThreshold: 5000, colFormatters: fmt });
                 let pag = '';
                 if (pages>1) {
                     pag += `<button ${chamadoPage===1?'disabled':''} data-p="prev">◀</button>`;
@@ -1376,95 +942,60 @@
                     else if (p) chamadoPage = parseInt(p);
                     renderChamadoPage();
                 };
-                setupTableDoubleClick('chamadoTableWrapper', getCol('caseTask'));
             }
-
             function renderStatusValor() {
                 const agg = aggregateByCol('status');
                 const totalGeral = agg.reduce((s,a)=>s+a.total,0);
-                renderTable('statusTableWrapper', ['Status', 'Total Divergência', '% do Total'], agg.map(r => [r.key, r.total, totalGeral>0?((r.total/totalGeral)*100).toFixed(1)+'%':'0.0%']), { colFormatters: [null, formatCurrency, null], dblClickCol: getCol('status') });
+                renderTable('statusTableWrapper', ['Status','Total Divergência','% do Total'], agg.map(r => [r.key, r.total, totalGeral>0?((r.total/totalGeral)*100).toFixed(1)+'%':'0.0%']), { colFormatters: [null, formatCurrency, null] });
                 if (agg.length) renderBarChart('chartStatus', agg.map(r=>r.key), [{ label: 'Valor Total', data: agg.map(r=>r.total), backgroundColor: '#2563eb' }], 'Valor Total por Status');
-                setupTableDoubleClick('statusTableWrapper', getCol('status'));
             }
-
             function getDadosColaboradoresFiltrados() {
-                let data = filteredData.filter(r => String(r['PRODUTIVO'] || '').trim() !== '');
-                const termoBusca = String(colaboradorSearchValue || '').trim();
-                if (termoBusca) {
-                    const matriculaBusca = (termoBusca.match(/\d+/) || [''])[0];
-                    const nomeBusca = termoBusca.replace(/^\d+\s*-\s*/, '').toLowerCase();
-                    if (matriculaBusca && /^\d/.test(termoBusca)) data = data.filter(r => String(r['CODPRODUTIVO'] || '').trim().includes(matriculaBusca));
-                    else data = data.filter(r => String(r['PRODUTIVO'] || '').trim().toLowerCase().includes(nomeBusca));
+                let data = filteredData.filter(r => String(r['PRODUTIVO']||'').trim() !== '');
+                const termo = String(colaboradorSearchValue||'').trim();
+                if (termo) {
+                    const lower = termo.toLowerCase();
+                    data = data.filter(r => String(r['PRODUTIVO']||'').toLowerCase().includes(lower));
                 }
                 return data;
             }
-
             function aggregateColaboradoresOfensores() {
-                const colVal = getCol('valorDivergencia');
-                if (!colVal) return [];
+                const colVal = idx['custo_total'];
                 const map = {};
                 getDadosColaboradoresFiltrados().forEach(row => {
-                    const produtivo = String(row['PRODUTIVO'] || '').trim();
-                    if (!produtivo) return;
-                    if (!map[produtivo]) {
-                        map[produtivo] = { 
-                            produtivo, 
-                            turnoIni: String(row['TURNO_INI'] || '').trim(),
-                            cargas: new Set(), 
-                            lotes: new Set(), 
-                            total: 0 
-                        };
-                    }
-                    const nCarga = String(row['NROCARGA'] || '').trim();
-                    const keyCargaLote = String(row['KEY_CARGA_LOTE'] || '').trim();
-                    const valor = typeof row[colVal] === 'number' ? row[colVal] : 0;
-                    if (nCarga) map[produtivo].cargas.add(nCarga);
-                    if (keyCargaLote) map[produtivo].lotes.add(keyCargaLote);
-                    map[produtivo].total += valor;
+                    const prod = String(row['PRODUTIVO']||'').trim();
+                    if (!prod) return;
+                    if (!map[prod]) map[prod] = { produtivo: prod, turnoIni: String(row['TURNO_INI']||'').trim(), cargas: new Set(), lotes: new Set(), total: 0 };
+                    const nCarga = String(row['CARGA']||'').trim();
+                    const keyCL = (row['CARGA']||'') + '_' + (row['LOTE']||'');
+                    if (nCarga) map[prod].cargas.add(nCarga);
+                    if (keyCL) map[prod].lotes.add(keyCL);
+                    map[prod].total += typeof row[colVal] === 'number' ? row[colVal] : 0;
                 });
-                return Object.values(map).map(item => ({ 
-                    produtivo: item.produtivo, 
-                    turnoIni: item.turnoIni,
-                    qtdCargas: item.cargas.size, 
-                    qtdLotes: item.lotes.size, 
-                    total: item.total 
-                })).sort((a, b) => b.total - a.total);
+                return Object.values(map).map(item => ({ produtivo: item.produtivo, turnoIni: item.turnoIni, qtdCargas: item.cargas.size, qtdLotes: item.lotes.size, total: item.total })).sort((a,b)=>b.total-a.total);
             }
-
             function renderColaboradoresOfensores() {
                 const agg = aggregateColaboradoresOfensores();
-                const colunas = ['PRODUTIVO', 'TURNO INI', 'CARGAS DIVERGENTES', 'LOTES DIVERGENTES', 'R$ DIVERGENTE'];
+                const cols = ['PRODUTIVO','TURNO INI','CARGAS DIVERGENTES','LOTES DIVERGENTES','R$ DIVERGENTE'];
                 const dados = agg.map(r => [r.produtivo, r.turnoIni, r.qtdCargas, r.qtdLotes, r.total]);
-                const formatadores = [null, null, formatNumber, formatNumber, formatCurrency];
-                renderTable('colaboradoresTableWrapper', colunas, dados, { colFormatters: formatadores });
-                if (agg.length) {
-                    const top = agg.slice(0, 10);
-                    renderBarChart('chartColaboradores', top.map(r => r.produtivo.substring(0,15)), [{ label: 'Valor Total', data: top.map(r => r.total), backgroundColor: '#dc2626' }], 'Top 10 Ofensores', { datalabelFormatter: v => formatK(v), tooltipLabelFormatter: v => formatK(v) });
-                }
+                const fmt = [null, null, formatNumber, formatNumber, formatCurrency];
+                renderTable('colaboradoresTableWrapper', cols, dados, { colFormatters: fmt });
+                if (agg.length) { const top = agg.slice(0,10); renderBarChart('chartColaboradores', top.map(r=>r.produtivo.substring(0,15)), [{ label: 'Valor Total', data: top.map(r=>r.total), backgroundColor: '#dc2626' }], 'Top 10 Ofensores'); }
             }
-
             function renderAprovacao() {
-                const turnos = ['1º Turno','2º Turno','3º Turno'], colChamado = getCol('caseTask'), colStatus = getCol('status'), colVal = getCol('valorDivergencia');
-                if (!colChamado||!colStatus||!colVal) return;
+                // Agrupamento por TURNO_INI
+                const turnos = [...new Set(filteredData.map(r => String(r['TURNO_INI']||'').trim()).filter(Boolean))].sort();
+                const colChamado = idx['case_task'], colStatus = idx['status'], colVal = idx['custo_total'];
                 const stats = turnos.map(turno => {
-                    const dados = filteredData.filter(r => turnoPorLoja[parseInt(r['N LOJA'],10)] === turno);
-                    const chamados = new Set(dados.map(r=>String(r[colChamado]||'')).filter(Boolean));
-                    const autorizados = dados.filter(r=>String(r[colStatus]||'').trim()==='Autorizado');
-                    const autSet = new Set(autorizados.map(r=>String(r[colChamado]||'')).filter(Boolean));
+                    const dados = filteredData.filter(r => String(r['TURNO_INI']||'').trim() === turno);
+                    const chamados = new Set(dados.map(r => String(r[colChamado]||'')).filter(Boolean));
+                    const aut = dados.filter(r => String(r[colStatus]||'').trim() === 'Autorizado');
+                    const autSet = new Set(aut.map(r => String(r[colChamado]||'')).filter(Boolean));
                     const vTotal = dados.reduce((s,r)=>s+(r[colVal]||0),0);
-                    const vAut = autorizados.reduce((s,r)=>s+(r[colVal]||0),0);
+                    const vAut = aut.reduce((s,r)=>s+(r[colVal]||0),0);
                     return { turno, total: chamados.size, autorizados: autSet.size, valorTotal: vTotal, valorAutorizado: vAut, perc: vTotal>0?(vAut/vTotal*100):0 };
                 });
-                renderTable('aprovTableWrapper', ['Turno','Total Chamados','Chamados Autorizados','Valor Total (R$)','Valor Autorizado (R$)','% Autorizado (Valor)'], stats.map(s=>[s.turno,s.total,s.autorizados,s.valorTotal,s.valorAutorizado,s.perc.toFixed(1)+'%']), { colFormatters: [null,formatNumber,formatNumber,formatCurrency,formatCurrency,null] });
-                if (stats.length) {
-                    renderBarChart('chartAprovacao', stats.map(s=>s.turno), [
-                        { label: 'Total de Chamados', data: stats.map(s=>s.total), backgroundColor: '#3b82f6' },
-                        { label: 'Chamados Autorizados', data: stats.map(s=>s.autorizados), backgroundColor: '#dc2626' }
-                    ], 'Índice de Aprovação por Turno', { 
-                        datalabelFormatter: v => Math.round(v).toString(), 
-                        tooltipLabelFormatter: v => Math.round(v).toString() 
-                    });
-                }
+                renderTable('aprovTableWrapper', ['Turno','Total Chamados','Chamados Autorizados','Valor Total (R$)','Valor Autorizado (R$)','% Autorizado (Valor)'], stats.map(s => [s.turno, s.total, s.autorizados, s.valorTotal, s.valorAutorizado, s.perc.toFixed(1)+'%']), { colFormatters: [null,formatNumber,formatNumber,formatCurrency,formatCurrency,null] });
+                if (stats.length) renderBarChart('chartAprovacao', stats.map(s=>s.turno), [{ label: 'Total de Chamados', data: stats.map(s=>s.total), backgroundColor: '#3b82f6' }, { label: 'Chamados Autorizados', data: stats.map(s=>s.autorizados), backgroundColor: '#dc2626' }], 'Índice de Aprovação por Turno', { datalabelFormatter: v=>Math.round(v).toString(), tooltipLabelFormatter: v=>Math.round(v).toString() });
             }
 
             window.copyTable = function(containerId) {
@@ -1477,11 +1008,7 @@
                     const cells = row.querySelectorAll('th, td');
                     return Array.from(cells).map(cell => cell.innerText.trim()).join('\t');
                 }).join('\n');
-                navigator.clipboard.writeText(text).then(() => {
-                    toast('📋 Tabela copiada!', 'success');
-                }).catch(() => {
-                    toast('Erro ao copiar tabela.', 'error');
-                });
+                navigator.clipboard.writeText(text).then(() => toast('📋 Tabela copiada!', 'success')).catch(() => toast('Erro ao copiar.', 'error'));
             };
 
             function salvarGrafico(canvasId) {
@@ -1502,7 +1029,9 @@
                 document.getElementById('btnCameraColaboradores').onclick = () => salvarGrafico('chartColaboradores');
             }
 
-            console.log('📦 HelpVision V1.8 pronto. Enriquecimento via Supabase.');
+            document.getElementById('btnLoadSupabase').onclick = loadFromSupabase;
+
+            console.log('📦 HelpVision V3.0 – Consulta BD_HELP otimizada.');
         })();
     </script>
 </body>
