@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelpVision – Carregar Dados</title>
+  <style>
+    :root { --bg:#f8fafc; --card-bg:#fff; --primary:#2563eb; --primary-hover:#1d4ed8; --text:#1e293b; --text-secondary:#64748b; --border:#e2e8f0; --danger:#dc2626; --success:#10b981; --warning:#f59e0b; --shadow-sm:0 1px 2px rgba(0,0,0,.05); --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06); --radius:12px; --radius-sm:8px; --transition:.2s ease; --filter-bg:#f1f5f9; --table-row-hover:#eef2ff; --btn-icon-bg:#fff; }
+    body.dark { --bg:#0f172a; --card-bg:#1e293b; --primary:#3b82f6; --primary-hover:#2563eb; --text:#e2e8f0; --text-secondary:#94a3b8; --border:#334155; --danger:#ef4444; --success:#10b981; --warning:#f59e0b; --shadow-sm:0 1px 2px rgba(0,0,0,.3); --shadow:0 1px 3px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.3); --filter-bg:#1e293b; --table-row-hover:#334155; --btn-icon-bg:#1e293b; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI','Inter',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; min-height:100vh; transition:background var(--transition),color var(--transition); }
+    .app-header { background:var(--card-bg); border-bottom:1px solid var(--border); padding:16px 24px; display:flex; flex-direction:column; gap:4px; box-shadow:var(--shadow-sm); position:sticky; top:0; z-index:100; transition:background var(--transition); }
+    .app-header .title-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .app-header h1 { font-size:1.25rem; font-weight:700; letter-spacing:-.3px; color:var(--text); white-space:nowrap; }
+    .app-header .credit { font-size:.75rem; color:var(--text-secondary); font-weight:400; }
+    .badge { font-size:.75rem; background:#eef2ff; color:var(--primary); padding:4px 10px; border-radius:20px; font-weight:600; white-space:nowrap; }
+    .theme-toggle,.btn-icon { background:none; border:2px solid var(--border); border-radius:20px; padding:6px 12px; cursor:pointer; font-size:1rem; transition:all var(--transition); display:flex; align-items:center; gap:4px; color:var(--text); background:var(--btn-icon-bg); }
+    .theme-toggle:hover,.btn-icon:hover { background:var(--table-row-hover); border-color:var(--primary); color:var(--primary); }
+    .btn-link-ext { background:var(--primary); color:#fff; border:none; border-radius:20px; padding:6px 16px; cursor:pointer; font-weight:700; font-size:.8rem; display:flex; align-items:center; gap:6px; transition:all var(--transition); white-space:nowrap; text-decoration:none; }
+    .btn-link-ext:hover { filter:brightness(1.1); transform:translateY(-1px); }
+    .container { max-width:1200px; margin:0 auto; padding:20px 24px; }
+    .card { background:var(--card-bg); border-radius:var(--radius); padding:20px; margin-bottom:20px; box-shadow:var(--shadow); border:1px solid var(--border); transition:background var(--transition); }
+    .card-header { font-weight:700; font-size:1.05rem; margin-bottom:14px; display:flex; align-items:center; gap:8px; color:var(--text); justify-content:space-between; }
+    .card-header .header-left { display:flex; align-items:center; gap:8px; }
+    .cards-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .base-card { min-height:235px; display:flex; flex-direction:column; }
+    .base-card h2 { font-size:1.1rem; margin-top:4px; }
+    .base-card p { color:var(--text-secondary); font-size:.86rem; margin-top:6px; }
+    .dropzone { border:2px dashed var(--border); border-radius:var(--radius-sm); background:var(--filter-bg); min-height:116px; margin-top:18px; padding:16px; display:flex; align-items:center; justify-content:center; text-align:center; transition:all var(--transition); }
+    .dropzone.ready { border-color:var(--success); background:color-mix(in srgb,var(--success) 8%,var(--filter-bg)); }
+    .dropzone strong { display:block; font-size:.9rem; color:var(--text); }
+    .dropzone small { display:block; margin-top:5px; color:var(--text-secondary); }
+    .dropzone button { margin-top:10px; }
+    .button-row { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:18px; }
+    .btn-primary { background:var(--primary); color:#fff; border:none; border-radius:20px; padding:10px 18px; cursor:pointer; font-weight:700; font-size:.85rem; transition:all var(--transition); }
+    .btn-primary:hover:not(:disabled) { background:var(--primary-hover); transform:translateY(-1px); }
+    .btn-primary.success { background:var(--success); }
+    .btn-primary:disabled { opacity:.45; cursor:not-allowed; }
+    .progress-wrap { margin-top:18px; display:none; }
+    .progress-wrap.active { display:block; }
+    .progress-label { display:flex; justify-content:space-between; gap:12px; font-size:.82rem; color:var(--text-secondary); margin-bottom:7px; }
+    .progress { height:10px; overflow:hidden; border-radius:20px; background:var(--filter-bg); border:1px solid var(--border); }
+    .progress > div { height:100%; width:0; background:var(--primary); transition:width .2s ease; }
+    .summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .summary-item { border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--filter-bg); padding:14px; }
+    .summary-item span { display:block; color:var(--text-secondary); font-size:.72rem; font-weight:700; text-transform:uppercase; }
+    .summary-item strong { display:block; margin-top:5px; font-size:1.35rem; color:var(--text); }
+    .alert { display:none; margin-top:18px; padding:12px 14px; border-radius:var(--radius-sm); font-size:.85rem; }
+    .alert.error { display:block; background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+    .alert.success { display:block; background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+    body.dark .alert.error { background:#450a0a; color:#fecaca; border-color:#7f1d1d; } body.dark .alert.success { background:#064e3b; color:#d1fae5; border-color:#065f46; }
+    .info { font-size:.84rem; color:var(--text-secondary); line-height:1.7; }
+    .modal-overlay { position:fixed; inset:0; z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,.55); backdrop-filter:blur(4px); }
+    .modal-overlay.active { display:flex; }
+    .modal { width:min(460px,100%); background:var(--card-bg); color:var(--text); border-radius:var(--radius); border:1px solid var(--border); box-shadow:0 20px 60px rgba(0,0,0,.3); padding:22px; }
+    .modal h3 { font-size:1.1rem; } .modal p { margin-top:10px; color:var(--text-secondary); font-size:.88rem; }
+    .modal input { width:100%; margin-top:16px; padding:10px 12px; border:2px solid var(--border); background:var(--filter-bg); color:var(--text); border-radius:8px; outline:none; }
+    .modal input:focus { border-color:var(--primary); }.modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
+    .toast { position:fixed; top:20px; right:20px; z-index:9999; padding:12px 20px; border-radius:8px; color:#fff; font-weight:600; font-size:.85rem; box-shadow:0 8px 20px rgba(0,0,0,.2); animation:slideIn .35s ease; max-width:400px; }.toast.error{background:var(--danger)}.toast.success{background:var(--success)}@keyframes slideIn{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+    #loadingOverlay { position:fixed; inset:0; background:rgba(15,23,42,.85); backdrop-filter:blur(12px); display:none; align-items:center; justify-content:center; flex-direction:column; z-index:10000; }.spinner{width:64px;height:64px;border:6px solid rgba(255,255,255,.15);border-top:6px solid var(--primary);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}#loadingMessage{color:#fff;margin-top:24px;font-size:1.1rem;font-weight:500;text-align:center;max-width:80%}
+    @media(max-width:800px){.cards-grid{grid-template-columns:1fr}.summary-grid{grid-template-columns:1fr}.container{padding:16px}.app-header{padding:14px 16px}}
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="title-row">
+      <span style="font-size:1.5rem">📦</span>
+      <h1>HelpVision 🔍 <span style="font-size:.85rem;font-weight:500;color:var(--text-secondary)">V3.0</span></h1>
+      <span class="badge">Carregamento de Dados</span>
+      <button class="theme-toggle" id="themeToggle" title="Alternar modo escuro/claro"><span id="themeIcon">🌙</span></button>
+      <a class="btn-link-ext" href="./HelpVision_painel.html">📊 Abrir Indicador</a>
+    </div>
+    <span class="credit">Desenvolvido por Pablo Martins Lopes</span>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="card-header"><div class="header-left">📤 Carregar Dados</div></div>
+      <p class="info">Selecione primeiro as duas pastas. O processamento reproduz o tratamento do Power Query para PLT_FECH e HELP, realiza a mesclagem por <strong>KEY (CARGA_LOTE)</strong> e mostra a prévia antes do envio.</p>
+    </section>
+
+    <section class="cards-grid">
+      <article class="card base-card">
+        <div class="card-header"><div class="header-left">📁 BASE PLT_FECH</div></div>
+        <p>Selecione a pasta que contém os TXT ou CSV de processamento. Os arquivos são tratados como PLT_FECH.</p>
+        <div id="pltZone" class="dropzone"><div><strong id="pltLabel">Nenhuma pasta selecionada</strong><small id="pltDetail">Arquivos TXT e CSV da pasta serão carregados.</small><button class="btn-icon" id="pltSelect">📂 Selecionar pasta</button></div></div>
+        <input id="pltInput" type="file" accept=".txt,.csv" webkitdirectory directory multiple hidden>
+      </article>
+      <article class="card base-card">
+        <div class="card-header"><div class="header-left">📁 BASE HELP</div></div>
+        <p>Selecione a pasta que contém os TXT ou CSV de divergências. Os arquivos serão mesclados com a PLT_FECH.</p>
+        <div id="helpZone" class="dropzone"><div><strong id="helpLabel">Nenhuma pasta selecionada</strong><small id="helpDetail">Arquivos TXT e CSV da pasta serão carregados.</small><button class="btn-icon" id="helpSelect">📂 Selecionar pasta</button></div></div>
+        <input id="helpInput" type="file" accept=".txt,.csv" webkitdirectory directory multiple hidden>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><div class="header-left">⚙️ Tratamento e Envio</div></div>
+      <div class="summary-grid">
+        <div class="summary-item"><span>Arquivos PLT_FECH</span><strong id="pltFilesCount">0</strong></div>
+        <div class="summary-item"><span>Arquivos HELP</span><strong id="helpFilesCount">0</strong></div>
+        <div class="summary-item"><span>Registros Consolidados</span><strong id="resultCount">0</strong></div>
+      </div>
+      <div id="progressWrap" class="progress-wrap"><div class="progress-label"><span id="progressText">Preparando...</span><span id="progressPct">0%</span></div><div class="progress"><div id="progressBar"></div></div></div>
+      <div id="message" class="alert"></div>
+      <div class="button-row"><button id="processBtn" class="btn-primary" disabled>🔄 Validar Dados</button><button id="sendBtn" class="btn-primary success" disabled>☁️ Enviar Dados</button></div>
+    </section>
+  </main>
+
+  <div id="confirmModal" class="modal-overlay"><div class="modal"><h3>⚠️ Substituir dados consolidados?</h3><p>O envio remove os registros atuais e grava a nova base consolidada no Supabase. Digite <strong>SUBSTITUIR</strong> para confirmar.</p><input id="confirmText" placeholder="Digite SUBSTITUIR"><div class="modal-actions"><button id="cancelBtn" class="btn-icon">Cancelar</button><button id="confirmBtn" class="btn-primary success" disabled>Confirmar envio</button></div></div></div>
+  <div id="loadingOverlay"><div class="spinner"></div><p id="loadingMessage">Carregando Dados, Por favor Aguarde...</p></div>
+
+  <script>
+    (() => {
+      const SUPABASE_URL = 'https://uvmrjjnlqpnrajmuikcz.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2bXJqam5scXBucmFqbXVpa2N6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjYxNzIsImV4cCI6MjA5Nzc0MjE3Mn0.KU2eRYiaRIaGgLaV2qeAX9If2e-oHO3UTZErz4n_Vs4';
+      const TABLE = 'BD_HELP';
+      const FINAL_COLUMNS = ['DATA_ABERTURA','STATUS','ESTADO','CASE_TASK','TIPO_DIVERGENCIA','CD_ORIGEM','LOJA_DESTINO','Nº_LOJA','CARGA','LOTE','KEY','COD_PRODUTO','DESCRICAO_PRODUTO','CUSTO_TOTAL_ITEM','STATUS_CARGA','DTAHORFATURAMENTO','DTAHORINITAREFA','DTAHORFIMTAREFA','INI','FIM','FAT','TURNO_INI','TURNO_FIM','TURNO_FAT','CODPRODUTIVO','PRODUTIVO','TIPO_LOTE'];
+      const state = { pltFiles: [], helpFiles: [], result: [] };
+      const byId = id => document.getElementById(id);
+      const text = value => String(value ?? '').trim();
+      const normalize = value => text(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase();
+      const valueOf = (row, ...names) => { for (const name of names) { if (Object.prototype.hasOwnProperty.call(row,name)) return row[name]; const key = Object.keys(row).find(k => normalize(k) === normalize(name)); if (key) return row[key]; } return ''; };
+      const toast = (message, type='success') => { document.querySelector('.toast')?.remove(); const el=document.createElement('div');el.className=`toast ${type}`;el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),3500); };
+      const setMessage = (message, type='') => { const el=byId('message');el.className=`alert ${type}`;el.textContent=message; };
+      const setProgress = (label, current, total) => { const pct=total?Math.min(100,Math.round((current/total)*100)):0;byId('progressWrap').classList.add('active');byId('progressText').textContent=label;byId('progressPct').textContent=`${pct}%`;byId('progressBar').style.width=`${pct}%`; };
+      const clearProgress = () => byId('progressWrap').classList.remove('active');
+      const toggleTheme = () => { const dark=!document.body.classList.contains('dark');document.body.classList.toggle('dark',dark);byId('themeIcon').textContent=dark?'☀️':'🌙';localStorage.setItem('darkMode',dark); };
+      const savedTheme=localStorage.getItem('darkMode');if(savedTheme==='true')toggleTheme();byId('themeToggle').onclick=toggleTheme;
+
+      const parseLine = (line, delimiter) => { const cells=[];let current='',quoted=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(quoted&&line[i+1]==='"'){current+='"';i++;}else quoted=!quoted;}else if(ch===delimiter&&!quoted){cells.push(current.trim());current='';}else current+=ch;}cells.push(current.trim());return cells; };
+      const parseDelimited = content => { const lines=content.replace(/^\uFEFF/,'').split(/\r?\n/).map(line=>line.replace(/\r$/,'')).filter(line=>line.trim());if(lines.length<2)return[];const delimiter=[';','|','\t',','].map(d=>({d,n:lines[0].split(d).length})).sort((a,b)=>b.n-a.n)[0].d;const headers=parseLine(lines[0],delimiter).map((h,i)=>h||`COLUNA_${i+1}`);return lines.slice(1).map(line=>{const values=parseLine(line,delimiter);return headers.reduce((row,header,i)=>{row[header]=values[i]??'';return row;},{});}); };
+      const readFiles = async (files, stage) => { const output=[];for(let i=0;i<files.length;i++){setProgress(`${stage}: lendo ${files[i].name}`,i+1,files.length);const buffer=await files[i].arrayBuffer();const content=new TextDecoder('windows-1252').decode(buffer);output.push(...parseDelimited(content));}return output; };
+      const distinct = rows => { const seen=new Set();return rows.filter(row=>{const serial=JSON.stringify(Object.keys(row).sort().reduce((result,key)=>{result[key]=row[key]??null;return result;},{}));if(seen.has(serial))return false;seen.add(serial);return true; }); };
+      const toDate = value => { const source=text(value).slice(0,10);if(!source)return null;let m=source.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})$/);if(m){const year=m[3].length===2?`20${m[3]}`:m[3];return `${year}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;}m=source.match(/^(\d{4})[/.\-](\d{1,2})[/.\-](\d{1,2})$/);return m?`${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`:null; };
+      const toNumber = value => { const source=text(value);if(!source)return null;const normalized=source.includes(',')&&source.includes('.')?source.replace(/\./g,'').replace(',','.'):source.replace(',','.');const parsed=Number(normalized.replace(/[^0-9.-]/g,''));return Number.isFinite(parsed)?parsed:null; };
+      const timeFromDateTime = value => { const candidate=text(value).slice(11,16).replace('.',':');return /^([01]\d|2[0-3]):[0-5]\d$/.test(candidate)?candidate:null; };
+      const turno = value => { if(!value)return null;const [hours,minutes]=value.split(':').map(Number),total=hours*60+minutes;if(total<360)return'3 TURNO';if(total<860)return'1 TURNO';if(total<1320)return'2 TURNO';return'3 TURNO'; };
+      const transformPLT = rows => { const selected=distinct(rows.map(row=>({DTAHORFATURAMENTO:text(valueOf(row,'DTAHORFATURAMENTO')),DTAHORINITAREFA:text(valueOf(row,'DTAHORINITAREFA')),DTAHORFIMTAREFA:text(valueOf(row,'DTAHORFIMTAREFA')),STATUS:text(valueOf(row,'STATUS')),NROCARGA:text(valueOf(row,'NROCARGA','Nº CARGA')),SEQLOTE:text(valueOf(row,'SEQLOTE','LOTE')),CODPRODUTIVO:text(valueOf(row,'CODPRODUTIVO')),PRODUTIVO:text(valueOf(row,'PRODUTIVO')),PLTFECHADO:text(valueOf(row,'PLTFECHADO'))})));return distinct(selected.map(row=>({...row,FAT:timeFromDateTime(row.DTAHORFATURAMENTO),INI:timeFromDateTime(row.DTAHORINITAREFA),FIM:timeFromDateTime(row.DTAHORFIMTAREFA)})).filter(row=>row.FAT&&row.INI&&row.FIM).filter(row=>row.STATUS.toUpperCase()==='FATURADA').map(row=>{const plt=row.PLTFECHADO.toUpperCase();return{DTAHORFATURAMENTO:toDate(row.DTAHORFATURAMENTO),DTAHORINITAREFA:toDate(row.DTAHORINITAREFA),DTAHORFIMTAREFA:toDate(row.DTAHORFIMTAREFA),INI:row.INI,FIM:row.FIM,FAT:row.FAT,TURNO_INI:turno(row.INI),TURNO_FIM:turno(row.FIM),TURNO_FAT:turno(row.FAT),STATUS_CARGA:row.STATUS,CODPRODUTIVO:row.CODPRODUTIVO.trim(),PRODUTIVO:row.PRODUTIVO.toUpperCase(),TIPO_LOTE:plt==='SIM'?'CONFERENTE':(plt==='NÃO'||plt==='NAO'?'SEPARADOR':'-'),KEY:`${row.NROCARGA.trim()}_${row.SEQLOTE.trim()}`};})); };
+      const splitStore = value => { const source=text(value),index=source.indexOf(' - ');return index<0?{loja:source,numero:''}:{loja:source.slice(0,index).trim(),numero:source.slice(index+3).trim()}; };
+      const transformHELP = (rows, pltRows) => { const selected=distinct(rows.filter(row=>text(valueOf(row,'Aberto em'))!=='Aberto em').map(row=>{const code=parseInt(text(valueOf(row,'Código do produto/item','Codigo do produto/item')),10);return{DATA_ABERTURA:toDate(valueOf(row,'Aberto em')),ESTADO:text(valueOf(row,'Estado_2','Estado')),CASE_TASK:text(valueOf(row,'Case Task')),TIPO_DIVERGENCIA:text(valueOf(row,'Tipo da divergência','Tipo da divergencia')),CD_ORIGEM:text(valueOf(row,'CD de Origem')),LOJA_DESTINO_RAW:text(valueOf(row,'Loja de Destino')),CARGA:text(valueOf(row,'Número da carga de expedição','Numero da carga de expedicao')),LOTE:text(valueOf(row,'Lote')),COD_PRODUTO:Number.isFinite(code)?code:null,DESCRICAO_PRODUTO:text(valueOf(row,'Descrição do produto/item','Descricao do produto/item')),CUSTO_TOTAL_ITEM:toNumber(valueOf(row,'Custo total do item (UN)')),STATUS:text(valueOf(row,'Status'))};}));const pltByKey=new Map();pltRows.forEach(row=>{const key=text(row.KEY);if(!pltByKey.has(key))pltByKey.set(key,[]);pltByKey.get(key).push(row);});const result=[];selected.forEach(help=>{const key=`${help.CARGA}_${help.LOTE}`,matches=pltByKey.get(key)||[{}];matches.forEach(plt=>{const store=splitStore(help.LOJA_DESTINO_RAW);result.push({DATA_ABERTURA:help.DATA_ABERTURA,STATUS:help.STATUS,ESTADO:help.ESTADO,CASE_TASK:help.CASE_TASK,TIPO_DIVERGENCIA:help.TIPO_DIVERGENCIA,CD_ORIGEM:help.CD_ORIGEM,LOJA_DESTINO:store.loja,'Nº_LOJA':store.numero,CARGA:help.CARGA,LOTE:help.LOTE,KEY:key,COD_PRODUTO:help.COD_PRODUTO,DESCRICAO_PRODUTO:help.DESCRICAO_PRODUTO,CUSTO_TOTAL_ITEM:help.CUSTO_TOTAL_ITEM,STATUS_CARGA:plt.STATUS_CARGA??null,DTAHORFATURAMENTO:plt.DTAHORFATURAMENTO??null,DTAHORINITAREFA:plt.DTAHORINITAREFA??null,DTAHORFIMTAREFA:plt.DTAHORFIMTAREFA??null,INI:plt.INI??null,FIM:plt.FIM??null,FAT:plt.FAT??null,TURNO_INI:plt.TURNO_INI??null,TURNO_FIM:plt.TURNO_FIM??null,TURNO_FAT:plt.TURNO_FAT??null,CODPRODUTIVO:plt.CODPRODUTIVO??null,PRODUTIVO:plt.PRODUTIVO??null,TIPO_LOTE:plt.TIPO_LOTE??null});});});return distinct(result); };
+      const updateFiles = base => { const input=byId(`${base}Input`),files=Array.from(input.files||[]).filter(file=>/\.(txt|csv)$/i.test(file.name));state[`${base}Files`]=files;const label=byId(`${base}Label`),detail=byId(`${base}Detail`),zone=byId(`${base}Zone`);label.textContent=files.length?`${files.length} arquivo${files.length===1?'':'s'} selecionado${files.length===1?'':'s'}`:'Nenhuma pasta selecionada';detail.textContent=files.length?'Pronto para leitura e tratamento.':'Arquivos TXT e CSV da pasta serão carregados.';zone.classList.toggle('ready',!!files.length);byId(`${base}FilesCount`).textContent=files.length.toLocaleString('pt-BR');byId('processBtn').disabled=!(state.pltFiles.length&&state.helpFiles.length);state.result=[];byId('resultCount').textContent='0';byId('sendBtn').disabled=true;setMessage(''); };
+      byId('pltSelect').onclick=()=>byId('pltInput').click();byId('helpSelect').onclick=()=>byId('helpInput').click();byId('pltInput').onchange=()=>updateFiles('plt');byId('helpInput').onchange=()=>updateFiles('help');
+      byId('processBtn').onclick=async()=>{try{setMessage('');byId('processBtn').disabled=true;byId('loadingOverlay').style.display='flex';byId('loadingMessage').textContent='Tratando arquivos PLT_FECH...';const pltSource=await readFiles(state.pltFiles,'PLT_FECH');const plt=transformPLT(pltSource);byId('loadingMessage').textContent='Tratando arquivos HELP e mesclando dados...';const helpSource=await readFiles(state.helpFiles,'HELP');state.result=transformHELP(helpSource,plt);byId('resultCount').textContent=state.result.length.toLocaleString('pt-BR');byId('sendBtn').disabled=!state.result.length;setMessage(`${state.result.length.toLocaleString('pt-BR')} registros consolidados prontos para envio. PLT_FECH válido: ${plt.length.toLocaleString('pt-BR')} registros.`,'success');toast('Dados tratados com sucesso!');}catch(error){setMessage(`Erro ao tratar os arquivos: ${error.message||error}`,'error');toast('Erro ao tratar dados.','error');}finally{clearProgress();byId('loadingOverlay').style.display='none';byId('processBtn').disabled=!(state.pltFiles.length&&state.helpFiles.length);}};
+      const headers={'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'Content-Type':'application/json'};const endpoint=`${SUPABASE_URL}/rest/v1/${encodeURIComponent(TABLE)}`;const normalizeRow=row=>FINAL_COLUMNS.reduce((output,column)=>{output[column]=row[column]??null;return output;},{});
+      const send = async()=>{try{byId('confirmModal').classList.remove('active');byId('loadingOverlay').style.display='flex';byId('sendBtn').disabled=true;setProgress('Removendo dados consolidados anteriores',0,state.result.length);let response=await fetch(endpoint,{method:'DELETE',headers:{...headers,Prefer:'return=minimal'}});if(!response.ok)throw new Error(await response.text());const size=400;for(let start=0;start<state.result.length;start+=size){const batch=state.result.slice(start,start+size).map(normalizeRow);setProgress('Enviando dados consolidados',Math.min(start+batch.length,state.result.length),state.result.length);response=await fetch(endpoint,{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify(batch)});if(!response.ok)throw new Error(await response.text());}setMessage(`Envio concluído: ${state.result.length.toLocaleString('pt-BR')} dados foram carregados com sucesso.`,'success');toast('Dados enviados com sucesso!');}catch(error){setMessage(`Erro ao enviar dados: ${error.message||error}`,'error');toast('Erro ao enviar dados.','error');byId('sendBtn').disabled=false;}finally{clearProgress();byId('loadingOverlay').style.display='none';}};
+      byId('sendBtn').onclick=()=>byId('confirmModal').classList.add('active');byId('cancelBtn').onclick=()=>{byId('confirmModal').classList.remove('active');byId('confirmText').value='';byId('confirmBtn').disabled=true;};byId('confirmText').oninput=e=>byId('confirmBtn').disabled=e.target.value!=='SUBSTITUIR';byId('confirmBtn').onclick=send;
+    })();
+  </script>
+</body>
+</html>
