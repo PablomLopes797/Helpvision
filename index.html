@@ -324,7 +324,7 @@
             <button class="theme-toggle" id="themeToggle" title="Alternar modo escuro/claro">
                 <span id="themeIcon">🌙</span>
             </button>
-            <button class="btn-icon" id="btnLoadSupabase" title="Recarregar dados do BD_HELP">☁️ Recarregar BD</button>
+            <button class="btn-icon" id="btnLoadSupabase" title="Recarregar dados">☁️ Recarregar BD</button>
             <button class="btn-link-ext" id="btnLinkExterno" title="Abrir link externo">🔗 Portal</button>
             <a class="btn-link-ext" href="./UPLOAD.HTML" title="Abrir carregamento de dados">📤 Carregar Dados</a>
         </div>
@@ -707,7 +707,7 @@
             async function loadFromSupabase() {
                 const overlay = document.getElementById('loadingOverlay');
                 overlay.style.display = 'flex';
-                document.getElementById('loadingMessage').textContent = 'Carregando dados do BD_HELP...';
+                document.getElementById('loadingMessage').textContent = 'Carregando dados...';
                 try {
                     const allRows = [];
                     let from = 0;
