@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HelpVision 🔍 V3.2 – Consulta BD_HELP</title>
+    <title>HelpVision 🔍 V3.4 – Consulta BD_HELP</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -176,116 +176,7 @@
         .chart-container { position: relative; width: 100%; height: 350px; }
         .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
         .colaborador-chart-container { height: 520px; }
-
-        /* ---------- Painel de apresentação ---------- */
-        .presentation-controls {
-            display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-            padding: 14px 18px; margin-bottom: 18px; border: 1px solid var(--border); border-radius: var(--radius);
-            background: linear-gradient(135deg, var(--card-bg), var(--filter-bg)); box-shadow: var(--shadow-sm);
-        }
-        .presentation-controls-copy { display: flex; flex-direction: column; gap: 2px; }
-        .presentation-controls-title { font-size: 1rem; font-weight: 800; color: var(--text); }
-        .presentation-controls-subtitle { color: var(--text-secondary); font-size: 0.8rem; }
-        .presentation-controls-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .presentation-interval { display: flex; align-items: center; gap: 8px; color: var(--text); font-size: 0.85rem; font-weight: 700; }
-        .presentation-interval input {
-            width: 86px; padding: 8px 10px; border: 2px solid var(--border); border-radius: 20px;
-            background: var(--card-bg); color: var(--text); font-weight: 700; text-align: center;
-        }
-        .presentation-interval input:focus { outline: none; border-color: var(--primary); }
-        .btn-presentation {
-            border: none; border-radius: 22px; padding: 10px 18px; cursor: pointer; color: #fff;
-            background: linear-gradient(135deg, var(--primary), #7c3aed); font-weight: 800; font-size: 0.85rem;
-            box-shadow: 0 5px 14px rgba(37, 99, 235, 0.24); transition: transform var(--transition), filter var(--transition);
-        }
-        .btn-presentation:hover { filter: brightness(1.08); transform: translateY(-1px); }
-
-        #presentationScreen {
-            display: none; position: fixed; inset: 0; z-index: 12000; overflow: hidden; color: #f8fafc;
-            background: #080f1e;
-        }
-        #presentationScreen.active { display: flex; }
-        body.presentation-active { overflow: hidden; }
-        .presentation-shell {
-            width: 100vw; height: 100vh; min-width: 0; min-height: 0; margin: auto; padding: clamp(14px, 2vw, 32px);
-            display: flex; flex-direction: column; gap: clamp(10px, 1.2vw, 20px);
-            background: radial-gradient(circle at 85% 8%, rgba(37,99,235,0.22), transparent 30%), #080f1e;
-        }
-        .presentation-topbar, .presentation-footer {
-            display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-            flex: 0 0 auto;
-        }
-        .presentation-brand { display: flex; align-items: baseline; gap: 12px; }
-        .presentation-brand strong { font-size: clamp(1.15rem, 2vw, 2rem); letter-spacing: -0.5px; }
-        .presentation-brand span, .presentation-footer { color: #94a3b8; font-size: clamp(0.65rem, 0.9vw, 0.85rem); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-        .presentation-topbar-meta { color: #cbd5e1; font-size: clamp(0.7rem, 0.9vw, 0.9rem); text-align: right; }
-        .presentation-exit {
-            border: 1px solid rgba(148,163,184,0.45); border-radius: 999px; padding: 8px 14px; cursor: pointer;
-            color: #e2e8f0; background: rgba(15,23,42,0.72); font-weight: 800; transition: background var(--transition), border-color var(--transition);
-        }
-        .presentation-exit:hover { background: rgba(37,99,235,0.35); border-color: #60a5fa; }
-        .presentation-summary {
-            display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(8px, 1vw, 16px); flex: 0 0 auto;
-        }
-        .presentation-summary-card {
-            padding: clamp(10px, 1.15vw, 20px); border: 1px solid rgba(148,163,184,0.22); border-radius: 14px;
-            background: rgba(15,23,42,0.72); box-shadow: 0 10px 28px rgba(0,0,0,0.12); min-width: 0;
-        }
-        .presentation-summary-card.authorized { border-color: rgba(16,185,129,0.55); background: linear-gradient(135deg, rgba(16,185,129,0.18), rgba(15,23,42,0.72)); }
-        .presentation-summary-card.open { border-color: rgba(245,158,11,0.55); background: linear-gradient(135deg, rgba(245,158,11,0.18), rgba(15,23,42,0.72)); }
-        .presentation-summary-card.difference { border-color: rgba(96,165,250,0.55); background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(15,23,42,0.72)); }
-        .presentation-summary-label { display: block; color: #cbd5e1; font-size: clamp(0.62rem, 0.85vw, 0.82rem); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
-        .presentation-summary-value { display: block; margin-top: 4px; color: #fff; font-size: clamp(1.15rem, 2.6vw, 2.8rem); line-height: 1.1; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .presentation-summary-detail { display: block; margin-top: 5px; color: #94a3b8; font-size: clamp(0.65rem, 0.85vw, 0.82rem); }
-        .presentation-viewport { flex: 1 1 auto; min-height: 0; display: flex; align-items: stretch; justify-content: center; }
-        .presentation-slide {
-            display: flex; flex-direction: column; gap: clamp(8px, 1vw, 14px); width: 100%; min-width: 0; min-height: 0;
-            padding: clamp(12px, 1.4vw, 24px); border: 1px solid rgba(148,163,184,0.22); border-radius: 18px;
-            background: rgba(15,23,42,0.7); box-shadow: 0 20px 55px rgba(0,0,0,0.22); animation: presentationFade 0.45s ease;
-        }
-        .presentation-slide-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex: 0 0 auto; }
-        .presentation-slide-title { font-size: clamp(1rem, 1.8vw, 1.65rem); font-weight: 850; color: #f8fafc; }
-        .presentation-slide-position { color: #93c5fd; font-size: clamp(0.7rem, 0.9vw, 0.9rem); font-weight: 800; white-space: nowrap; }
-        .presentation-chart-area {
-            position: relative; flex: 1 1 auto; min-height: 0; width: 100%; padding: clamp(8px, 1vw, 16px);
-            border-radius: 12px; background: rgba(248,250,252,0.98);
-        }
-        .presentation-chart-area canvas { width: 100% !important; height: 100% !important; }
-        .presentation-footer { justify-content: space-between; }
-        .presentation-footer strong { color: #cbd5e1; }
-        @keyframes presentationFade { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }
-        @media (max-width: 700px) {
-            .presentation-controls { align-items: stretch; }
-            .presentation-controls-actions { width: 100%; justify-content: space-between; }
-            .presentation-summary { grid-template-columns: 1fr; }
-            .presentation-summary-card { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; }
-            .presentation-summary-detail { grid-column: 1 / -1; }
-            .presentation-topbar-meta { display: none; }
-            .presentation-shell { padding: 10px; gap: 8px; }
-            .presentation-slide { padding: 10px; }
-        }
-
-        /* Leitura à distância: TVs Full HD/4K e monitores grandes */
-        @media (min-width: 1200px) and (min-height: 650px) {
-            .presentation-shell { padding: clamp(24px, 2.5vw, 48px); gap: clamp(14px, 1.6vw, 28px); }
-            .presentation-topbar, .presentation-footer { gap: 22px; }
-            .presentation-brand { gap: 18px; }
-            .presentation-brand strong { font-size: clamp(1.8rem, 2.8vw, 3rem); }
-            .presentation-brand span, .presentation-footer { font-size: clamp(0.95rem, 1.15vw, 1.25rem); letter-spacing: 0.1em; }
-            .presentation-topbar-meta { font-size: clamp(0.95rem, 1.15vw, 1.25rem); }
-            .presentation-exit { padding: 12px 20px; font-size: clamp(0.95rem, 1.1vw, 1.2rem); }
-            .presentation-summary { gap: clamp(14px, 1.5vw, 26px); }
-            .presentation-summary-card { padding: clamp(18px, 1.8vw, 32px) clamp(20px, 2vw, 38px); border-radius: 18px; }
-            .presentation-summary-label { font-size: clamp(0.95rem, 1.15vw, 1.3rem); }
-            .presentation-summary-value { margin-top: 8px; font-size: clamp(2.4rem, 3.35vw, 4.2rem); }
-            .presentation-summary-detail { margin-top: 9px; font-size: clamp(0.9rem, 1.05vw, 1.15rem); }
-            .presentation-slide { gap: clamp(12px, 1.25vw, 22px); padding: clamp(18px, 1.8vw, 32px); border-radius: 22px; }
-            .presentation-slide-heading { gap: 20px; }
-            .presentation-slide-title { font-size: clamp(1.7rem, 2.35vw, 2.7rem); }
-            .presentation-slide-position { font-size: clamp(0.95rem, 1.1vw, 1.25rem); }
-            .presentation-chart-area { padding: clamp(14px, 1.25vw, 24px); border-radius: 16px; }
-            .presentation-footer { font-size: clamp(0.95rem, 1.15vw, 1.25rem); }
-        }
+        @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
 
         .highlight-red { background-color: #fee2e2 !important; font-weight: 700; }
         body.dark .highlight-red { background-color: #450a0a !important; }
@@ -324,9 +215,9 @@
             <button class="theme-toggle" id="themeToggle" title="Alternar modo escuro/claro">
                 <span id="themeIcon">🌙</span>
             </button>
-            <button class="btn-icon" id="btnLoadSupabase" title="Recarregar dados">☁️ Recarregar BD</button>
-            <button class="btn-link-ext" id="btnLinkExterno" title="Abrir link externo">🔗 Portal</button>
-            <a class="btn-link-ext" href="./UPLOAD.HTML" title="Abrir carregamento de dados">📤 Carregar Dados</a>
+            <button class="btn-icon" id="btnLoadSupabase" title="Recarregar dados consolidados">☁️ Recarregar Dados</button>
+            <button class="btn-icon" id="btnFullMode" title="Ativar modo Full com atualização automática a cada 1 hora" aria-pressed="false">⛶ Modo Full</button>
+            <button class="btn-link-ext" id="btnLinkExterno" title="Abrir carregador de dados">📤 Carregar Dados</button>
         </div>
         <span class="credit">Desenvolvido por Pablo Martins Lopes</span>
         <span class="ultima-atualizacao" id="ultimaAtualizacao">Última atualização da base: —</span>
@@ -335,20 +226,6 @@
     <div class="container">
         <div id="mainContent" style="display:none;">
             <div class="kpi-grid" id="kpiGrid"></div>
-
-            <section class="presentation-controls" aria-label="Configuração do painel de apresentação">
-                <div class="presentation-controls-copy">
-                    <span class="presentation-controls-title">Painel de gráficos em loop</span>
-                    <span class="presentation-controls-subtitle">Escolha o tempo entre os gráficos e depois inicie a tela cheia. A sequência reinicia automaticamente.</span>
-                </div>
-                <div class="presentation-controls-actions">
-                    <label class="presentation-interval" for="presentationInterval">Intervalo (s)
-                        <input id="presentationInterval" type="number" min="3" max="3600" step="1" value="15" inputmode="numeric">
-                    </label>
-                    <button class="btn-presentation" id="btnStartPresentation" type="button">▶ Iniciar painel</button>
-                </div>
-            </section>
-
             <div class="filter-bar">
                 <div class="filter-group">
                     <label>🔽 Status:</label>
@@ -554,48 +431,10 @@
             <div class="empty-state">
                 <span class="empty-icon">📂</span>
                 <p><strong>Carregando dados...</strong></p>
-                <p style="color:var(--text-secondary);">Aguarde enquanto os dados são obtidos do Supabase.</p>
+                <p style="color:var(--text-secondary);">Aguarde enquanto os dados consolidados são obtidos.</p>
             </div>
         </div>
     </div>
-
-    <section id="presentationScreen" aria-label="Painel Help Vision em tela cheia" aria-hidden="true">
-        <div class="presentation-shell">
-            <div class="presentation-topbar">
-                <div class="presentation-brand">
-                    <strong>Help Vision</strong>
-                    <span>Monitoramento operacional</span>
-                </div>
-                <div class="presentation-topbar-meta" id="presentationLastUpdate">Base atualizada em —</div>
-                <button class="presentation-exit" id="btnExitPresentation" type="button">× Sair da tela cheia</button>
-            </div>
-
-            <div class="presentation-summary" id="presentationSummary">
-                <article class="presentation-summary-card authorized">
-                    <span class="presentation-summary-label">Valor autorizado</span>
-                    <strong class="presentation-summary-value">R$ 0,00</strong>
-                    <small class="presentation-summary-detail">Status autorizado</small>
-                </article>
-                <article class="presentation-summary-card open">
-                    <span class="presentation-summary-label">Valor aberto</span>
-                    <strong class="presentation-summary-value">R$ 0,00</strong>
-                    <small class="presentation-summary-detail">Status aberto</small>
-                </article>
-                <article class="presentation-summary-card difference">
-                    <span class="presentation-summary-label">Autorizado x aberto</span>
-                    <strong class="presentation-summary-value">R$ 0,00</strong>
-                    <small class="presentation-summary-detail">Diferença entre os valores</small>
-                </article>
-            </div>
-
-            <div class="presentation-viewport" id="presentationViewport"></div>
-
-            <div class="presentation-footer">
-                <span id="presentationSlideInfo">Preparando apresentação...</span>
-                <span>Atualização automática a cada <strong>6 horas</strong></span>
-            </div>
-        </div>
-    </section>
 
     <div id="loadingOverlay" style="display:none;">
         <div class="spinner"></div>
@@ -611,7 +450,7 @@
             const ENRIQ_TABLE = 'BD_HELP';
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            const LINK_EXTERNO = 'https://exemplo.com/portal'; // altere para o link desejado
+            const LINK_EXTERNO = './carregar-dados.html';
 
             let allData = [];
             let headers = [];
@@ -621,21 +460,6 @@
             let idx = {};
             let charts = {};
 
-            const PRESENTATION_SLIDES = [
-                { canvasId: 'chartTipo', title: 'Valor total por tipo de divergência' },
-                { canvasId: 'chartLoja', title: 'Top 10 lojas por valor de divergência' },
-                { canvasId: 'chartItem', title: 'Top 10 itens por valor de divergência' },
-                { canvasId: 'chartStatus', title: 'Valor total por status' },
-                { canvasId: 'chartAprovacao', title: 'Índice de aprovação por turno' }
-            ];
-            const PRESENTATION_REFRESH_MS = 6 * 60 * 60 * 1000;
-            let presentationTimer = null;
-            let presentationRefreshTimer = null;
-            let presentationChart = null;
-            let presentationCurrentIndex = 0;
-            let presentationActive = false;
-            let presentationIntervalSeconds = 15;
-
             let allPage = 1;
             const allPerPage = 50;
             let allFiltered = [];
@@ -643,6 +467,8 @@
             const chamadoPerPage = 30;
             let smartSearchValue = '';
             let colaboradorSearchValue = '';
+            const FULL_REFRESH_INTERVAL = 60 * 60 * 1000;
+            let fullRefreshTimer = null;
 
             // ---------- Dark mode ----------
             function applyTheme(dark) {
@@ -703,11 +529,11 @@
             function escapeHTML(str) { return String(str || '').replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
             function computeTotalDivergencia(data) { return data.reduce((acc, r) => acc + (typeof r['CUSTO_TOTAL_ITEM'] === 'number' ? r['CUSTO_TOTAL_ITEM'] : 0), 0); }
 
-            // ---------- Carregar dados do BD_HELP ----------
+            // ---------- Carregar dados consolidados ----------
             async function loadFromSupabase() {
                 const overlay = document.getElementById('loadingOverlay');
                 overlay.style.display = 'flex';
-                document.getElementById('loadingMessage').textContent = 'Carregando dados...';
+                document.getElementById('loadingMessage').textContent = 'Carregando dados consolidados...';
                 try {
                     const allRows = [];
                     let from = 0;
@@ -722,7 +548,7 @@
                         overlay.style.display = 'none';
                         document.getElementById('noDataMessage').style.display = 'block';
                         document.getElementById('mainContent').style.display = 'none';
-                        toast('Nenhum dado no BD_HELP.', 'error');
+                        toast('Nenhum dado consolidado disponível.', 'error');
                         return;
                     }
                     allData = allRows;
@@ -769,13 +595,10 @@
                     renderAll();
                     overlay.style.display = 'none';
                     document.getElementById('ultimaAtualizacao').textContent = 'Última atualização: ' + new Date().toLocaleString('pt-BR');
-                    updatePresentationLastUpdate();
-                    if (presentationActive) showPresentationSlide(presentationCurrentIndex);
-                    scheduleAutomaticRefresh();
                     toast('✅ Dados carregados com sucesso!', 'success');
                 } catch (err) {
                     overlay.style.display = 'none';
-                    toast('Erro ao carregar BD_HELP: ' + err.message, 'error');
+                    toast('Erro ao carregar dados: ' + err.message, 'error');
                     console.error(err);
                 }
             }
@@ -786,6 +609,46 @@
             // Botão link externo
             document.getElementById('btnLinkExterno').addEventListener('click', () => {
                 window.open(LINK_EXTERNO, '_blank');
+            });
+
+            // ---------- Modo Full com atualização automática ----------
+            function setFullMode(active) {
+                const button = document.getElementById('btnFullMode');
+                button.setAttribute('aria-pressed', String(active));
+                button.textContent = active ? '⛶ Sair do Full' : '⛶ Modo Full';
+                button.title = active
+                    ? 'Sair do modo Full'
+                    : 'Ativar modo Full com atualização automática a cada 1 hora';
+
+                if (fullRefreshTimer) {
+                    clearInterval(fullRefreshTimer);
+                    fullRefreshTimer = null;
+                }
+
+                if (active) {
+                    fullRefreshTimer = setInterval(() => {
+                        toast('Atualização automática do modo Full iniciada.');
+                        loadFromSupabase();
+                    }, FULL_REFRESH_INTERVAL);
+                    toast('Modo Full ativo. Os dados serão recarregados automaticamente a cada 1 hora.');
+                }
+            }
+
+            document.getElementById('btnFullMode').addEventListener('click', async () => {
+                try {
+                    if (document.fullscreenElement) {
+                        await document.exitFullscreen();
+                    } else {
+                        await document.documentElement.requestFullscreen();
+                    }
+                } catch (error) {
+                    toast('Não foi possível ativar o modo Full neste navegador.', 'error');
+                    console.error(error);
+                }
+            });
+
+            document.addEventListener('fullscreenchange', () => {
+                setFullMode(Boolean(document.fullscreenElement));
             });
 
             // ---------- UI Filtros ----------
@@ -985,6 +848,20 @@
                 return Object.values(map).sort((a,b) => b.total - a.total);
             }
 
+            function aggregateLojas(data = filteredData) {
+                const map = {};
+                data.forEach(r => {
+                    const nome = String(r['LOJA_DESTINO'] || '').trim();
+                    const numero = String(r['Nº_LOJA'] || '').trim();
+                    const key = numero ? `${nome} - ${numero}` : (nome || '(vazio)');
+                    const v = typeof r['CUSTO_TOTAL_ITEM'] === 'number' ? r['CUSTO_TOTAL_ITEM'] : 0;
+                    if (!map[key]) map[key] = { key, total: 0, count: 0 };
+                    map[key].total += v;
+                    map[key].count++;
+                });
+                return Object.values(map).sort((a,b) => b.total - a.total);
+            }
+
             function renderTable(containerId, columns, data, options = {}) {
                 const container = document.getElementById(containerId);
                 if (!container) return;
@@ -1033,172 +910,8 @@
                 });
             }
 
-            function getPresentationTotals() {
-                const values = filteredData.reduce((acc, row) => {
-                    const statuses = [row['STATUS'], row['ESTADO']].map(value => String(value ?? '').trim().toLowerCase());
-                    const value = typeof row['CUSTO_TOTAL_ITEM'] === 'number' ? row['CUSTO_TOTAL_ITEM'] : 0;
-                    if (statuses.includes('autorizado') || statuses.includes('authorized')) acc.authorized += value;
-                    else if (statuses.includes('aberto') || statuses.includes('open')) acc.open += value;
-                    return acc;
-                }, { authorized: 0, open: 0 });
-                const base = values.authorized + values.open;
-                return {
-                    ...values,
-                    difference: values.authorized - values.open,
-                    authorizedPct: base ? (values.authorized / base) * 100 : 0,
-                    openPct: base ? (values.open / base) * 100 : 0
-                };
-            }
-
-            function updatePresentationSummary() {
-                const summary = document.getElementById('presentationSummary');
-                if (!summary) return;
-                const totals = getPresentationTotals();
-                const cards = summary.querySelectorAll('.presentation-summary-card');
-                if (cards.length < 3) return;
-                cards[0].querySelector('.presentation-summary-value').textContent = formatCurrency(totals.authorized);
-                cards[0].querySelector('.presentation-summary-detail').textContent = `${totals.authorizedPct.toFixed(1)}% do total autorizado + aberto`;
-                cards[1].querySelector('.presentation-summary-value').textContent = formatCurrency(totals.open);
-                cards[1].querySelector('.presentation-summary-detail').textContent = `${totals.openPct.toFixed(1)}% do total autorizado + aberto`;
-                cards[2].querySelector('.presentation-summary-value').textContent = formatCurrency(totals.difference);
-                cards[2].querySelector('.presentation-summary-detail').textContent = totals.difference >= 0 ? 'Autorizado acima do aberto' : 'Aberto acima do autorizado';
-            }
-
-            function updatePresentationLastUpdate() {
-                const source = document.getElementById('ultimaAtualizacao');
-                const target = document.getElementById('presentationLastUpdate');
-                if (source && target) target.textContent = source.textContent.replace('Última atualização:', 'Base atualizada em');
-            }
-
-            function clonePresentationDataset(dataset) {
-                const copy = { ...dataset };
-                if (Array.isArray(dataset.data)) copy.data = [...dataset.data];
-                return copy;
-            }
-
-            function showPresentationSlide(index) {
-                const viewport = document.getElementById('presentationViewport');
-                const slideInfo = document.getElementById('presentationSlideInfo');
-                if (!viewport || !slideInfo) return;
-                const slide = PRESENTATION_SLIDES[index];
-                const sourceChart = charts[slide.canvasId];
-                if (presentationChart) {
-                    presentationChart.destroy();
-                    presentationChart = null;
-                }
-                viewport.innerHTML = `
-                    <article class="presentation-slide">
-                        <div class="presentation-slide-heading">
-                            <h2 class="presentation-slide-title">${escapeHTML(slide.title)}</h2>
-                            <span class="presentation-slide-position">${index + 1} / ${PRESENTATION_SLIDES.length}</span>
-                        </div>
-                        <div class="presentation-chart-area" id="presentationChartArea"></div>
-                    </article>`;
-                const chartArea = document.getElementById('presentationChartArea');
-                if (!sourceChart || !sourceChart.data?.labels?.length) {
-                    chartArea.innerHTML = '<div class="empty-state" style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#64748b;"><span class="empty-icon">📭</span><strong>Nenhum dado para este gráfico</strong></div>';
-                    slideInfo.textContent = `${slide.title} • Gráfico ${index + 1} de ${PRESENTATION_SLIDES.length}`;
-                    return;
-                }
-                const canvas = document.createElement('canvas');
-                canvas.id = 'presentationChartCanvas';
-                chartArea.appendChild(canvas);
-                const textColor = '#1e293b';
-                const gridColor = '#cbd5e1';
-                const largeDisplay = window.innerWidth >= 1200 && window.innerHeight >= 650;
-                const chartLegendFontSize = largeDisplay ? 17 : 13;
-                const chartDataLabelFontSize = largeDisplay ? 17 : 13;
-                const chartAxisFontSize = largeDisplay ? 16 : 12;
-                const sourceOptions = sourceChart.config?.options || {};
-                const sourceTooltip = sourceOptions.plugins?.tooltip?.callbacks?.label;
-                const sourceDatalabels = sourceOptions.plugins?.datalabels || {};
-                presentationChart = new Chart(canvas.getContext('2d'), {
-                    type: sourceChart.config.type,
-                    data: {
-                        labels: [...sourceChart.data.labels],
-                        datasets: sourceChart.data.datasets.map(clonePresentationDataset)
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        animation: { duration: 450 },
-                        layout: { padding: { top: 28, right: 14, left: 8, bottom: 8 } },
-                        plugins: {
-                            legend: { display: sourceChart.data.datasets.length > 1, position: 'bottom', labels: { color: textColor, font: { size: chartLegendFontSize, weight: '700' } } },
-                            title: { display: false },
-                            tooltip: { callbacks: { label: ctx => typeof sourceTooltip === 'function' ? sourceTooltip(ctx) : `${ctx.dataset.label}: ${formatK(ctx.parsed.y)}` } },
-                            datalabels: { ...sourceDatalabels, color: textColor, font: { weight: 'bold', size: chartDataLabelFontSize } }
-                        },
-                        scales: {
-                            x: { ticks: { maxRotation: 45, color: textColor, font: { size: chartAxisFontSize, weight: '600' } }, grid: { color: gridColor } },
-                            y: { beginAtZero: true, ticks: { color: textColor, font: { size: chartAxisFontSize }, callback: v => formatK(v) }, grid: { color: gridColor } }
-                        }
-                    }
-                });
-                slideInfo.textContent = `${slide.title} • Gráfico ${index + 1} de ${PRESENTATION_SLIDES.length}`;
-                requestAnimationFrame(() => presentationChart?.resize());
-            }
-
-            function stopPresentationTimer() {
-                if (presentationTimer) { clearInterval(presentationTimer); presentationTimer = null; }
-            }
-
-            async function startPresentation() {
-                const input = document.getElementById('presentationInterval');
-                const parsed = Number(input?.value);
-                presentationIntervalSeconds = Math.min(3600, Math.max(3, Number.isFinite(parsed) ? parsed : 15));
-                if (input) input.value = presentationIntervalSeconds;
-                stopPresentationTimer();
-                presentationActive = true;
-                presentationCurrentIndex = 0;
-                updatePresentationSummary();
-                updatePresentationLastUpdate();
-                const screen = document.getElementById('presentationScreen');
-                screen.classList.add('active');
-                screen.setAttribute('aria-hidden', 'false');
-                document.body.classList.add('presentation-active');
-                showPresentationSlide(presentationCurrentIndex);
-                presentationTimer = setInterval(() => {
-                    if (!presentationActive) return;
-                    presentationCurrentIndex = (presentationCurrentIndex + 1) % PRESENTATION_SLIDES.length;
-                    showPresentationSlide(presentationCurrentIndex);
-                }, presentationIntervalSeconds * 1000);
-                try {
-                    if (!document.fullscreenElement && screen.requestFullscreen) await screen.requestFullscreen();
-                } catch (err) {
-                    console.warn('Tela cheia nativa indisponível; usando painel em tela inteira.', err);
-                }
-            }
-
-            function exitPresentation() {
-                presentationActive = false;
-                stopPresentationTimer();
-                if (presentationChart) { presentationChart.destroy(); presentationChart = null; }
-                const screen = document.getElementById('presentationScreen');
-                screen.classList.remove('active');
-                screen.setAttribute('aria-hidden', 'true');
-                document.body.classList.remove('presentation-active');
-                if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
-            }
-
-            function scheduleAutomaticRefresh() {
-                if (presentationRefreshTimer) clearInterval(presentationRefreshTimer);
-                presentationRefreshTimer = setInterval(() => loadFromSupabase(), PRESENTATION_REFRESH_MS);
-            }
-
-            document.getElementById('btnStartPresentation').addEventListener('click', startPresentation);
-            document.getElementById('btnExitPresentation').addEventListener('click', exitPresentation);
-            document.addEventListener('keydown', e => {
-                if (presentationActive && e.key === 'Escape') exitPresentation();
-            });
-            document.addEventListener('fullscreenchange', () => {
-                if (!presentationActive) return;
-                if (!document.fullscreenElement) exitPresentation();
-                else setTimeout(() => showPresentationSlide(presentationCurrentIndex), 180);
-            });
-
             function renderAll() {
                 renderKPIs();
-                updatePresentationSummary();
                 renderDadosBrutos();
                 renderTipoDivergencia();
                 renderLoja();
@@ -1244,8 +957,8 @@
                 if (agg.length) renderBarChart('chartTipo', agg.map(r=>r.key), [{ label: 'Valor Total', data: agg.map(r=>r.total), backgroundColor: '#2563eb' }], 'Valor por Tipo');
             }
             function renderLoja() {
-                const agg = aggregateByCol('loja_destino');
-                renderTable('lojaTableWrapper', ['Loja Destino','Total Divergência','Qtd Ocorrências'], agg.map(r => [r.key, r.total, r.count]), { colFormatters: [null, formatCurrency, formatNumber] });
+                const agg = aggregateLojas();
+                renderTable('lojaTableWrapper', ['Loja Destino - Nº Loja','Total Divergência','Qtd Ocorrências'], agg.map(r => [r.key, r.total, r.count]), { colFormatters: [null, formatCurrency, formatNumber] });
                 if (agg.length) { const top = agg.slice(0,10); renderBarChart('chartLoja', top.map(r=>r.key), [{ label: 'Valor Total', data: top.map(r=>r.total), backgroundColor: '#2563eb' }], 'Top 10 Lojas'); }
             }
             function renderItem() {
